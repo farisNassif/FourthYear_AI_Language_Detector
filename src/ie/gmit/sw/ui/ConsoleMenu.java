@@ -7,7 +7,7 @@ import ie.gmit.sw.Language;
 /* Simple class that just handles the program menu */
 public class ConsoleMenu {
 	Scanner scanner = new Scanner(System.in);
-	
+
 	public void DisplayMenu() {
 		/*
 		 * Each of the languages in the enum Language can be represented as a number
@@ -23,13 +23,22 @@ public class ConsoleMenu {
 
 	public void MainMenu() {
 		int option;
-	
-		do {
-			System.out.println("Press 1 to Loop");
-			System.out.println("Press 9 to Quit");
-			option = scanner.nextInt();
 
-		} while (option != 9);
+		System.out.println("Press 1 to Loop");
+		System.out.println("Press 9 to Quit");
+		option = scanner.nextInt();
+
+		switch (option) {
+		case 1:
+			MainMenu();
+			break;
+		case 9:
+			System.out.println("Exiting ..");
+			break;
+		default:
+			MainMenu();
+		}
+
 		scanner.close();
 	}
 }
