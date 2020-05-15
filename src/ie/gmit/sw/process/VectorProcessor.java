@@ -13,12 +13,15 @@ import ie.gmit.sw.util.Utilities;
 
 public class VectorProcessor {
 	double[] vector = new double[100];
+	private static DecimalFormat df2 = new DecimalFormat("#.##");
+	double one = 1.00001;
+	double zero = 0.00001;
 	private DecimalFormat df = new DecimalFormat("###.###");
 	private String kmer;
 	private int kmerSize = 2;
 	private double[] langInd = new double[235];
 	Language[] langs = Language.values();
-	static File data = new File("./data.csv");
+	static File data = new File("./data.txt");
 
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
@@ -36,7 +39,7 @@ public class VectorProcessor {
 		String line = null;
 		int count = 0;
 		while ((line = bufferedReader.readLine()) != null && count != 5) {
-			// count++;
+			count++;
 			/* For each line of text in the document .. */
 			process(line);
 
@@ -67,7 +70,7 @@ public class VectorProcessor {
 		vector = Utilities.normalize(vector, 0, 1);
 
 		/* File handlers */
-		FileWriter fw = new FileWriter("./data.csv", true);
+		FileWriter fw = new FileWriter("./data.txt", true);
 		BufferedWriter bw = new BufferedWriter(fw);
 
 		for (int i = 0; i < vector.length - kmerSize; i++) {
@@ -75,11 +78,22 @@ public class VectorProcessor {
 		}
 
 		/* Append the language to the end */
-		bw.write(lang.toLowerCase());
+		// bw.write(lang.toLowerCase());
 
 		for (int i = 0; i < langs.length; i++) {
+			if (i != langs.length-1) {
+				bw.write("0.0" + ", ");
+			} else {
+				bw.write("0.0");
+			}
+
 			if (lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
-				langInd[i] = 1;
+				if (i != langs.length-1) {
+					bw.write("1.0" + ", ");
+				} else {
+					bw.write("1.0");
+				}
+
 			}
 		}
 
