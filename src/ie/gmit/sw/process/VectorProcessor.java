@@ -18,9 +18,15 @@ public class VectorProcessor {
 	private int kmerSize = 2;
 	private double[] langInd = new double[235];
 	Language[] langs = Language.values();
+	static File data = new File("./data.txt");
 
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
+		if (data.delete()) {
+			System.out.println("Deleted the file: " + data.getName());
+		} else {
+			System.out.println("Failed to delete the file.");
+		}
 		new VectorProcessor().parse();
 	}
 
@@ -53,16 +59,12 @@ public class VectorProcessor {
 
 		for (int i = 0; i <= vector.length - 1; i++) {
 			/* Generate the kmer */
-
 			kmer = text.substring(i, i + kmerSize);
+			/* Populate vector */
 			vector[i] = kmer.hashCode() % vector.length;
 		}
+		/* Normalize it */
 		vector = Utilities.normalize(vector, 0, 1);
-
-		for (int i = 0; i <= vector.length - 1; i++) {
-			kmer = text.substring(i, i + kmerSize);
-			System.out.println(lang + "[" + i + "] " + kmer + " - " + vector[i]);
-		}
 
 		FileWriter fw = new FileWriter("./data.txt", true);
 		BufferedWriter bw = new BufferedWriter(fw);
@@ -70,7 +72,8 @@ public class VectorProcessor {
 		for (int i = 0; i < vector.length - kmerSize; i++) {
 			bw.write(df.format(vector[i]) + ", ");
 		}
-		bw.write(lang);
+		/* Append the language to the end */
+		bw.write(lang.toLowerCase());
 
 		for (int i = 0; i < langs.length; i++) {
 			if (lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
