@@ -18,14 +18,14 @@ public class VectorProcessor {
 	private int kmerSize = 2;
 	private double[] langInd = new double[235];
 	Language[] langs = Language.values();
-	static File data = new File("./data.txt");
+	static File data = new File("./data.csv");
 
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
 		if (data.delete()) {
 			System.out.println("Deleted the file: " + data.getName());
 		} else {
-			System.out.println("Failed to delete the file.");
+			System.out.println("No file existed to delete");
 		}
 		new VectorProcessor().parse();
 	}
@@ -36,7 +36,7 @@ public class VectorProcessor {
 		String line = null;
 		int count = 0;
 		while ((line = bufferedReader.readLine()) != null && count != 5) {
-			count++;
+			// count++;
 			/* For each line of text in the document .. */
 			process(line);
 
@@ -66,12 +66,14 @@ public class VectorProcessor {
 		/* Normalize it */
 		vector = Utilities.normalize(vector, 0, 1);
 
-		FileWriter fw = new FileWriter("./data.txt", true);
+		/* File handlers */
+		FileWriter fw = new FileWriter("./data.csv", true);
 		BufferedWriter bw = new BufferedWriter(fw);
 
 		for (int i = 0; i < vector.length - kmerSize; i++) {
 			bw.write(df.format(vector[i]) + ", ");
 		}
+
 		/* Append the language to the end */
 		bw.write(lang.toLowerCase());
 
@@ -79,9 +81,6 @@ public class VectorProcessor {
 			if (lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
 				langInd[i] = 1;
 			}
-			// bw.write(langInd[i] + ", ");
-			// langInd[i] = 0;
-
 		}
 
 		bw.newLine();
