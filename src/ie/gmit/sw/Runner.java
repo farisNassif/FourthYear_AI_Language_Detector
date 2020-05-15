@@ -10,7 +10,7 @@ public class Runner {
 	public static void main(String[] args) {
 		ConsoleMenu menu = new ConsoleMenu();
 
-		//menu.MainMenu();
+		menu.MainMenu();
 
 		try {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream("./wili-2018-Small-11750-Edited.txt")));
