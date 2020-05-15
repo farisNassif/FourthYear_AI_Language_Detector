@@ -2,7 +2,7 @@ package ie.gmit.sw.ui;
 
 import java.util.Scanner;
 
-import language.Language;
+import ie.gmit.sw.language.Language;
 
 /* Simple class that just handles the program menu */
 public class ConsoleMenu {
@@ -35,9 +35,9 @@ public class ConsoleMenu {
 			System.out.println("Exiting ..");
 			break;
 		default:
+			System.out.println("Invalid input, try again.");
 			MainMenu();
 		}
-
 		scanner.close();
 	}
 }

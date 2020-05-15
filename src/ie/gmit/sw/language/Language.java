@@ -1,4 +1,4 @@
-package language;
+package ie.gmit.sw.language;
 
 public enum Language {
 	Achinese ("Achinese"),

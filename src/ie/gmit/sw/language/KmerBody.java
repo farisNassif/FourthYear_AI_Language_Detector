@@ -1,6 +1,8 @@
-package language;
+package ie.gmit.sw.language;
 
 /**
+ * - This class was taken from my Adv OOP Project -
+ * 
  * Defines the structure of a k-mer and allows for attributes to be mapped and
  * compared with other k-mers for Language calculation
  */
