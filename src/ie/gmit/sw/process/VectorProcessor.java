@@ -7,12 +7,14 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 import ie.gmit.sw.language.Language;
 import ie.gmit.sw.util.Utilities;
 
 public class VectorProcessor {
-	double[] vector = new double[100];
+
 	private DecimalFormat df = new DecimalFormat("###.###");
 	private String kmer;
 	private int kmerSize = 2;
@@ -43,6 +45,9 @@ public class VectorProcessor {
 
 	/* Processes the line (language) */
 	public void process(String line) throws Exception {
+		/* Reset the vector each iteration */
+		double[] vector = new double[100];
+
 		String[] record = line.split("@");
 
 		/* If more than two @ symbols are found .. */
@@ -54,12 +59,10 @@ public class VectorProcessor {
 		String text = record[0].toLowerCase();
 		String lang = record[1];
 
-		/* Loop (n) times, depending on the size of the vector */
-		for (int i = 0; i < vector.length; i++) {
-			/* Generate (n) kmers */
-			kmer = text.substring(i, i + kmerSize);
-			/* Populate vector of (n) size with (n) kmers (hashcode of) */
-			vector[i] = kmer.hashCode() % vector.length;
+		/* Generate (n) kmers and loop (n) times */
+		for (String kmer : genKmers(text)) {
+			/* Vector index will be frequency of that hashcode, increment if found again */
+			vector[kmer.hashCode() % vector.length]++;
 		}
 
 		/* Normalize it */
@@ -75,25 +78,37 @@ public class VectorProcessor {
 		}
 
 		/* 235 values following the vector values */
-		//for (int i = 0; i < langs.length; i++) {
-			/* The language being processed doesn't match the index of the language enum */
-		//	if (!lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
-				/* 0.0 will be appended 234 times to the vector values */
-		//		bw.write("0.0");
-		//	} else {
-				/* Matched language defined by 1.0 */
-		//		bw.write("1.0");
-		//	}
+		// for (int i = 0; i < langs.length; i++) {
+		/* The language being processed doesn't match the index of the language enum */
+		// if (!lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
+		/* 0.0 will be appended 234 times to the vector values */
+		// bw.write("0.0");
+		// } else {
+		/* Matched language defined by 1.0 */
+		// bw.write("1.0");
+		// }
 
-			/* If it isn't the last value written in a line .. */
-		//	if (i != langs.length - 1) {
-		//		bw.write(", ");
-		//	}
-		//}
+		/* If it isn't the last value written in a line .. */
+		// if (i != langs.length - 1) {
+		// bw.write(", ");
+		// }
+		// }
 
 		bw.write(lang);
 		/* For each language being entered .. */
 		bw.newLine();
 		bw.close();
 	}
+
+	public Set<String> genKmers(String text) {
+		int kmerSize = 3;
+		Set<String> kmers = new HashSet<String>();
+
+		for (int i = 0; i < text.length() - kmerSize; i++) {
+			kmers.add(text.substring(i, i + kmerSize));
+		}
+
+		return kmers;
+	}
+
 }
