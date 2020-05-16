@@ -19,7 +19,6 @@ public class VectorProcessor {
 	private DecimalFormat df = new DecimalFormat("###.###");
 	private String kmer;
 	private int kmerSize = 2;
-	private double[] langInd = new double[235];
 	Language[] langs = Language.values();
 	static File data = new File("./data.txt");
 
@@ -37,12 +36,9 @@ public class VectorProcessor {
 		BufferedReader bufferedReader = new BufferedReader(
 				new InputStreamReader(new FileInputStream("./wili-2018-Small-11750-Edited.txt")));
 		String line = null;
-		int count = 0;
-		while ((line = bufferedReader.readLine()) != null && count != 5) {
-			count++;
+		while ((line = bufferedReader.readLine()) != null) {
 			/* For each line of text in the document .. */
 			process(line);
-
 		}
 		bufferedReader.close();
 	}
@@ -60,7 +56,7 @@ public class VectorProcessor {
 		String text = record[0].toLowerCase();
 		String lang = record[1];
 
-		for (int i = 0; i <= vector.length - 1; i++) {
+		for (int i = 0; i < vector.length; i++) {
 			/* Generate the kmer */
 			kmer = text.substring(i, i + kmerSize);
 			/* Populate vector */
@@ -73,7 +69,7 @@ public class VectorProcessor {
 		FileWriter fw = new FileWriter("./data.txt", true);
 		BufferedWriter bw = new BufferedWriter(fw);
 
-		for (int i = 0; i < vector.length - kmerSize; i++) {
+		for (int i = 0; i < vector.length; i++) {
 			bw.write(df.format(vector[i]) + ", ");
 		}
 
@@ -81,17 +77,17 @@ public class VectorProcessor {
 		// bw.write(lang.toLowerCase());
 
 		for (int i = 0; i < langs.length; i++) {
-			if (i != langs.length-1) {
+			if (i != langs.length - 1) {
 				bw.write("0.0" + ", ");
 			} else {
 				bw.write("0.0");
 			}
 
 			if (lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
-				if (i != langs.length-1) {
+				if (i != langs.length - 1) {
 					bw.write("1.0" + ", ");
 				} else {
-					bw.write("1.0");
+					bw.write(", 1.0");
 				}
 
 			}
