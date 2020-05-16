@@ -36,17 +36,21 @@ public class Parser {
 		return lines;
 	}
 
-	public Set<String> ToNgrams() {
-		Set<String> ignoreWords = new HashSet<String>();
-		
-		
-		return ignoreWords;
-	}
-	public static void main(String[] args) throws Throwable {
-		String[] f = new Parser().ParseFile();
+	public Set<String> ToKmers(String[] lines) {
+		int kmerSize = 2;
+		Set<String> kmers = new HashSet<String>();
 
-		for (int i = 0; i < f.length; i++) {
-			System.out.println(f[i]);
+		for (String line : lines) {
+			for (int i = 0; i < line.length() - kmerSize + 1; i++) {
+				kmers.add(line.substring(i, i + kmerSize));
+			}
 		}
+
+		return kmers;
+	}
+
+	public static void main(String[] args) throws Throwable {
+		Set<String> kmers = new Parser().ToKmers(new Parser().ParseFile());
+
 	}
 }
