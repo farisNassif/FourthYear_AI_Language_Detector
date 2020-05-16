@@ -45,7 +45,7 @@ public class VectorProcessor {
 
 	/* Processes the line (language) */
 	public void process(String line) throws Exception {
-		/* Reset the vector each iteration */
+		/* New vector each iteration */
 		double[] vector = new double[100];
 
 		String[] record = line.split("@");
@@ -74,27 +74,12 @@ public class VectorProcessor {
 
 		/* Write the vector values to the file */
 		for (int i = 0; i < vector.length; i++) {
-			bw.write(df.format(vector[i]) + ", ");
+			bw.write(df.format(vector[i]) + ",");
 		}
 
-		/* 235 values following the vector values */
-		// for (int i = 0; i < langs.length; i++) {
-		/* The language being processed doesn't match the index of the language enum */
-		// if (!lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
-		/* 0.0 will be appended 234 times to the vector values */
-		// bw.write("0.0");
-		// } else {
-		/* Matched language defined by 1.0 */
-		// bw.write("1.0");
-		// }
-
-		/* If it isn't the last value written in a line .. */
-		// if (i != langs.length - 1) {
-		// bw.write(", ");
-		// }
-		// }
-
+		/* Append the language */
 		bw.write(lang);
+
 		/* For each language being entered .. */
 		bw.newLine();
 		bw.close();
