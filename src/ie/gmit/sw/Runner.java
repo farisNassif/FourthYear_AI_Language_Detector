@@ -36,15 +36,3 @@ public class Runner {
 		
 	}
 }
-
-/**
-
-
-		private void parse(String text, String lang, int... ks) {
-			Language language = Language.valueOf(lang);
-			
-			for (int i = 0; i <= text.length() - k; i++) {
-				CharSequence kmer = text.substring(i, i + k);
-			}
-		}
-**/

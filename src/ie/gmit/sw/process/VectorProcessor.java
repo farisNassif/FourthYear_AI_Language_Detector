@@ -16,13 +16,12 @@ import ie.gmit.sw.util.Utilities;
 public class VectorProcessor {
 
 	private DecimalFormat df = new DecimalFormat("###.###");
-	private String kmer;
-	private int kmerSize = 2;
 	Language[] langs = Language.values();
-	static File data = new File("./data.txt");
+	static File data = new File("./data.csv");
 
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
+		/* https://www.w3schools.com/java/java_files_delete.asp */
 		if (data.delete()) {
 			System.out.println("Deleted the file: " + data.getName());
 		} else {
@@ -43,7 +42,7 @@ public class VectorProcessor {
 		bufferedReader.close();
 	}
 
-	/* Processes the line (language) */
+	/* Processes the language associated text */
 	public void process(String line) throws Exception {
 		/* New vector each iteration */
 		double[] vector = new double[100];
@@ -61,7 +60,7 @@ public class VectorProcessor {
 
 		/* Generate (n) kmers and loop (n) times */
 		for (String kmer : genKmers(text)) {
-			/* Vector index will be frequency of that hashcode, increment if found again */
+			/* Increment the vector value at that index by 1 */
 			vector[kmer.hashCode() % vector.length]++;
 		}
 
@@ -69,7 +68,7 @@ public class VectorProcessor {
 		vector = Utilities.normalize(vector, 0, 1);
 
 		/* File handlers */
-		FileWriter fw = new FileWriter("./data.txt", true);
+		FileWriter fw = new FileWriter("./data.csv", true);
 		BufferedWriter bw = new BufferedWriter(fw);
 
 		/* Write the vector values to the file */
@@ -77,14 +76,30 @@ public class VectorProcessor {
 			bw.write(df.format(vector[i]) + ",");
 		}
 
-		/* Append the language */
-		bw.write(lang);
+		/* Loop 235 times */
+		for (int i = 0; i < langs.length; i++) {
+
+			if (!langs[i].toString().equals(lang)) {
+				/* If currently processed language doesn't match indexed lang .. */
+				bw.write("0");
+			} else {
+				/* If indexed lang matches currently processed lang .. */
+				bw.write("1");
+			}
+			
+			/* If it's the last time looping, omit the comma */
+			if (i != langs.length - 1) {
+				bw.write(",");
+			}
+
+		}
 
 		/* For each language being entered .. */
 		bw.newLine();
 		bw.close();
 	}
 
+	/* Standard, for each processed line, pass it in here and return kmers */
 	public Set<String> genKmers(String text) {
 		int kmerSize = 3;
 		Set<String> kmers = new HashSet<String>();

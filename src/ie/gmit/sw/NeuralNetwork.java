@@ -2,17 +2,14 @@ package ie.gmit.sw;
 
 import java.io.File;
 
-import org.encog.engine.network.activation.ActivationReLU;
 import org.encog.engine.network.activation.ActivationSigmoid;
-import org.encog.engine.network.activation.ActivationSoftMax;
+import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.buffer.MemoryDataLoader;
 import org.encog.ml.data.buffer.codec.CSVDataCODEC;
 import org.encog.ml.data.buffer.codec.DataSetCODEC;
-import org.encog.ml.train.strategy.RequiredImprovementStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.util.csv.CSVFormat;
 
@@ -29,7 +26,7 @@ public class NeuralNetwork {
 		// Configure the neural network topology.
 		BasicNetwork network = new BasicNetwork();
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, inputs));
-		network.addLayer(new BasicLayer(new ActivationSigmoid(), false, 330));
+		network.addLayer(new BasicLayer(new ActivationTANH(), false, (int) Math.sqrt(inputs*outputs)));
 		network.addLayer(new BasicLayer(new ActivationSigmoid(), true, outputs));
 		network.getStructure().finalizeStructure();
 		network.reset();
