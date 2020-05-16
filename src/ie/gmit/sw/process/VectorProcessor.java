@@ -56,12 +56,14 @@ public class VectorProcessor {
 		String text = record[0].toLowerCase();
 		String lang = record[1];
 
+		/* Loop depending on the size of the vector */
 		for (int i = 0; i < vector.length; i++) {
-			/* Generate the kmer */
+			/* Generate (n) kmers */
 			kmer = text.substring(i, i + kmerSize);
-			/* Populate vector */
+			/* Populate vector of (n) size with (n) kmers (hashcode of) */
 			vector[i] = kmer.hashCode() % vector.length;
 		}
+
 		/* Normalize it */
 		vector = Utilities.normalize(vector, 0, 1);
 
@@ -69,30 +71,30 @@ public class VectorProcessor {
 		FileWriter fw = new FileWriter("./data.txt", true);
 		BufferedWriter bw = new BufferedWriter(fw);
 
+		/* Write the vector values to the file */
 		for (int i = 0; i < vector.length; i++) {
 			bw.write(df.format(vector[i]) + ", ");
 		}
 
-		/* Append the language to the end */
-		// bw.write(lang.toLowerCase());
-
+		/* 235 values following the vector values */
 		for (int i = 0; i < langs.length; i++) {
-			if (i != langs.length - 1) {
-				bw.write("0.0" + ", ");
-			} else {
+
+			/* If the language being processed matches the value of the language enum */
+			if (!lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
+				/* 0.0 will be appended 234 times to the vector values */
 				bw.write("0.0");
+			} else {
+				/* Matched language defined by 1.0 */
+				bw.write("1.0");
 			}
 
-			if (lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
-				if (i != langs.length - 1) {
-					bw.write("1.0" + ", ");
-				} else {
-					bw.write(", 1.0");
-				}
-
+			/* If it isn't the last value written in a line .. */
+			if (i != langs.length - 1) {
+				bw.write(", ");
 			}
 		}
 
+		/* For each language being entered .. */
 		bw.newLine();
 		bw.close();
 	}
