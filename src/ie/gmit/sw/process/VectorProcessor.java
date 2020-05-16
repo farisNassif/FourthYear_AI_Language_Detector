@@ -13,9 +13,6 @@ import ie.gmit.sw.util.Utilities;
 
 public class VectorProcessor {
 	double[] vector = new double[100];
-	private static DecimalFormat df2 = new DecimalFormat("#.##");
-	double one = 1.00001;
-	double zero = 0.00001;
 	private DecimalFormat df = new DecimalFormat("###.###");
 	private String kmer;
 	private int kmerSize = 2;
@@ -40,6 +37,7 @@ public class VectorProcessor {
 			/* For each line of text in the document .. */
 			process(line);
 		}
+		/* Processing is finished, close */
 		bufferedReader.close();
 	}
 
@@ -56,7 +54,7 @@ public class VectorProcessor {
 		String text = record[0].toLowerCase();
 		String lang = record[1];
 
-		/* Loop depending on the size of the vector */
+		/* Loop (n) times, depending on the size of the vector */
 		for (int i = 0; i < vector.length; i++) {
 			/* Generate (n) kmers */
 			kmer = text.substring(i, i + kmerSize);
@@ -77,23 +75,23 @@ public class VectorProcessor {
 		}
 
 		/* 235 values following the vector values */
-		for (int i = 0; i < langs.length; i++) {
-
-			/* If the language being processed matches the value of the language enum */
-			if (!lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
+		//for (int i = 0; i < langs.length; i++) {
+			/* The language being processed doesn't match the index of the language enum */
+		//	if (!lang.equalsIgnoreCase(String.valueOf(langs[i]))) {
 				/* 0.0 will be appended 234 times to the vector values */
-				bw.write("0.0");
-			} else {
+		//		bw.write("0.0");
+		//	} else {
 				/* Matched language defined by 1.0 */
-				bw.write("1.0");
-			}
+		//		bw.write("1.0");
+		//	}
 
 			/* If it isn't the last value written in a line .. */
-			if (i != langs.length - 1) {
-				bw.write(", ");
-			}
-		}
+		//	if (i != langs.length - 1) {
+		//		bw.write(", ");
+		//	}
+		//}
 
+		bw.write(lang);
 		/* For each language being entered .. */
 		bw.newLine();
 		bw.close();
