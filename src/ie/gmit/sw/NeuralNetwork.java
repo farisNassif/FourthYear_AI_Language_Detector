@@ -55,8 +55,8 @@ public class NeuralNetwork {
 
 		/* Neural Network Training configu */
 		MLTrain train = new ResilientPropagation(network, folded);
-		
-		/* 5-fold cross validation */
+
+		/* (5)k-fold cross validation */
 		CrossValidationKFold cv = new CrossValidationKFold(train, 5);
 
 		/* Train */
@@ -70,6 +70,39 @@ public class NeuralNetwork {
 		cv.finishTraining();
 
 		System.out.println("Training Done in " + epoch + " epochs with error " + cv.getError());
+
+		// Test
+		double correct = 0;
+		double total = 0;
+		for (MLDataPair data : mdlTrainingSet) {
+			total++;
+			MLData output = network.compute(data.getInput());
+
+			int y = (int) Math.round(output.getData(0));
+			int yd = (int) data.getIdeal().getData(0);
+
+			if (y == yd) {
+				correct++;
+			}
+
+		}
+
+		double[] in = { 0.522, 0.333, 0.222, 0.111, 0.222, 0.333, 0.333, 0.333, 0.556, 0.222, 0.333, 0.444, 0.556,
+				0.778, 0.343, 1, 0.333, 0.333, 0.444, 0.222, 0.556, 0.333, 0.111, 0.111, 0.222, 0.222, 0.222, 0.222,
+				0.333, 0.333, 0.333, 0.222, 0.111, 0, 0.111, 0.444, 0.222, 0, 0.111, 0.111, 0.222, 0.444, 0.111, 0.444,
+				0.333, 0.444, 0.222, 0.444, 0.222, 0.111, 0.444, 0, 0.111, 0.222, 0, 0.222, 0.556, 0, 0.444, 0.333,
+				0.111, 0, 0.556, 0.333, 0.222, 0.444, 0.222, 0.333, 0.333, 0.222, 0.222, 0.333, 0.222, 0.333, 0.222,
+				0.444, 0.333, 0.111, 0.222, 0.222, 0.222, 0.444, 0.222, 0.333, 0.111, 0.333, 0.222, 0.333, 0.111, 0,
+				0.333, 0.333, 0.333, 0.333, 0.222, 0.333, 0.111, 0.667, 0.444, 0.333 };
+
+		double[] out = new double[235];
+
+		System.out.println("[INFO] Testing complete. Acc= " + (correct / total) * 100);
+		network.compute(in, out);
+		
+		for (int i = 0; i < out.length; i++) {
+			System.out.print(out[i] + ",");
+		}
 
 		/* Stop Encog running */
 		Encog.getInstance().shutdown();
