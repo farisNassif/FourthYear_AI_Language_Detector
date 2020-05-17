@@ -17,7 +17,7 @@ public class VectorProcessor {
 
 	private DecimalFormat df = new DecimalFormat("###.###");
 	Language[] langs = Language.values();
-	static File data = new File("./data.csv");
+	static File data = new File("./data.txt");
 
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
@@ -68,7 +68,7 @@ public class VectorProcessor {
 		vector = Utilities.normalize(vector, 0, 1);
 
 		/* File handlers */
-		FileWriter fw = new FileWriter("./data.csv", true);
+		FileWriter fw = new FileWriter("./data.txt", true);
 		BufferedWriter bw = new BufferedWriter(fw);
 
 		/* Write the vector values to the file */
@@ -76,7 +76,7 @@ public class VectorProcessor {
 			bw.write(df.format(vector[i]) + ",");
 		}
 
-		/* Loop 235 times */
+		/* Loop 235 times, this will append the language as true / false */
 		for (int i = 0; i < langs.length; i++) {
 
 			if (!langs[i].toString().equals(lang)) {
@@ -86,7 +86,7 @@ public class VectorProcessor {
 				/* If indexed lang matches currently processed lang .. */
 				bw.write("1");
 			}
-			
+
 			/* If it's the last time looping, omit the comma */
 			if (i != langs.length - 1) {
 				bw.write(",");
