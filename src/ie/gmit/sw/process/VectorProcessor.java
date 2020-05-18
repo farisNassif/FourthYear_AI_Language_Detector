@@ -19,7 +19,7 @@ public class VectorProcessor {
 	private DecimalFormat df = new DecimalFormat("###.###");
 	Language[] langs = Language.values();
 	static File data = new File("./data.csv");
-
+	
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
 		Stopwatch timer = new Stopwatch();
@@ -51,7 +51,7 @@ public class VectorProcessor {
 	/* Processes the language associated text */
 	public void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[25];
+		double[] vector = new double[100];
 
 		String[] record = line.split("@");
 
