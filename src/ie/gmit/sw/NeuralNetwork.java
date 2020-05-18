@@ -18,6 +18,7 @@ import org.encog.neural.networks.training.cross.CrossValidationKFold;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.util.csv.CSVFormat;
 
+import ie.gmit.sw.language.Language;
 import ie.gmit.sw.util.Stopwatch;
 
 /* 
@@ -31,6 +32,7 @@ public class NeuralNetwork {
 	}
 
 	public NeuralNetwork() {
+		Language[] langs = Language.values();
 		int inputs = 100;
 		int outputs = 235;
 		double minError = 0.0040; // While training, it would plateau at 0.004491100233148725
@@ -84,6 +86,7 @@ public class NeuralNetwork {
 				"Training Done in " + epochs + " epochs with error rate " + cv.getError() + " in " + timer.toString());
 		
 		double totalValues = 0;
+		double correct = 0;
 		
 		/* Test the data */
 		for (MLDataPair data : mdlTrainingSet) {
@@ -94,12 +97,23 @@ public class NeuralNetwork {
 
 			double actual = actualData.getData(0);
 			double predict = predictData.getData(0);
-			double diff = Math.abs(predict - actual);
-
+			System.out.println(actualData.getData().length);
+			
+			/* This will loop 235 times, task is to find the language with a val of 1 */
+			for (int i = 0; i < actualData.getData().length ; i++) {
+				if (actualData.getData(i)==1) {
+					/* The output language */
+					// System.out.println(langs[i]);
+				}
+				
+			}
+			
 			totalValues++;
 			
 		}
 
+		System.out.println(correct + "/" + totalValues);
+		
 		double[] in = { 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0,
 				0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0.5,
 				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.5, 0,
