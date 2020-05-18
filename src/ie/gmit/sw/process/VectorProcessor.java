@@ -17,11 +17,11 @@ public class VectorProcessor {
 
 	private DecimalFormat df = new DecimalFormat("###.###");
 	Language[] langs = Language.values();
-	static File data = new File("./data.txt");
+	static File data = new File("./data.csv");
 
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
-		/* https://www.w3schools.com/java/java_files_delete.asp */
+		/* Delete file if exists */
 		if (data.delete()) {
 			System.out.println("Deleted the file: " + data.getName());
 		} else {
@@ -45,7 +45,7 @@ public class VectorProcessor {
 	/* Processes the language associated text */
 	public void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[100];
+		double[] vector = new double[250];
 
 		String[] record = line.split("@");
 
@@ -68,7 +68,7 @@ public class VectorProcessor {
 		vector = Utilities.normalize(vector, 0, 1);
 
 		/* File handlers */
-		FileWriter fw = new FileWriter("./data.txt", true);
+		FileWriter fw = new FileWriter("./data.csv", true);
 		BufferedWriter bw = new BufferedWriter(fw);
 
 		/* Write the vector values to the file */
@@ -101,7 +101,7 @@ public class VectorProcessor {
 
 	/* Standard, for each processed line, pass it in here and return kmers */
 	public Set<String> genKmers(String text) {
-		int kmerSize = 3;
+		int kmerSize = 4;
 		Set<String> kmers = new HashSet<String>();
 
 		for (int i = 0; i < text.length() - kmerSize; i++) {
