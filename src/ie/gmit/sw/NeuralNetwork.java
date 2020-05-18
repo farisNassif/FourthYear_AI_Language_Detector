@@ -3,8 +3,6 @@ package ie.gmit.sw;
 import java.io.File;
 
 import org.encog.Encog;
-import org.encog.engine.network.activation.ActivationReLU;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationSoftMax;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
@@ -20,7 +18,6 @@ import org.encog.neural.networks.training.cross.CrossValidationKFold;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.util.csv.CSVFormat;
 
-import ie.gmit.sw.language.Language;
 import ie.gmit.sw.util.Stopwatch;
 
 /* 
@@ -36,7 +33,7 @@ public class NeuralNetwork {
 	public NeuralNetwork() {
 		int inputs = 100;
 		int outputs = 235;
-		double minError = 0.005;
+		double minError = 0.0040; // While training, it would plateau at 0.004491100233148725
 
 		/* Neural Network Configuration */
 		BasicNetwork network = new BasicNetwork();
@@ -69,21 +66,39 @@ public class NeuralNetwork {
 		Stopwatch timer = new Stopwatch();
 
 		/* Train */
-		int epoch = 0;
+		int epochs = 0;
 		System.out.println("[INFO] Training...");
 		timer.start();
 		do {
 			cv.iteration();
-			epoch++;
-			System.out.println("Epoch: " + epoch + " Error Rate: " + cv.getError() + " ...");
+			epochs++;
+			System.out.println("Epoch: " + epochs + " Error Rate: " + cv.getError() + " ...");
 
-		} while (cv.getError() > minError);
+		} while (epochs < 2);
+
 		/* Declare the end of training */
 		cv.finishTraining();
 		timer.stop();
 
 		System.out.println(
-				"Training Done in " + epoch + " epochs with error rate " + cv.getError() + " in " + timer.toString());
+				"Training Done in " + epochs + " epochs with error rate " + cv.getError() + " in " + timer.toString());
+		
+		double totalValues = 0;
+		
+		/* Test the data */
+		for (MLDataPair data : mdlTrainingSet) {
+			/* https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf - Page 147 */
+			MLData input = data.getInput();
+			MLData actualData = data.getIdeal();
+			MLData predictData = network.compute(input);
+
+			double actual = actualData.getData(0);
+			double predict = predictData.getData(0);
+			double diff = Math.abs(predict - actual);
+
+			totalValues++;
+			
+		}
 
 		double[] in = { 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0,
 				0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0.5,

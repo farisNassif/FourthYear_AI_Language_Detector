@@ -106,7 +106,7 @@ public class VectorProcessor {
 
 	/* Standard, for each processed line, pass it in here and return kmers */
 	public Set<String> genKmers(String text) {
-		int kmerSize = 4;
+		int kmerSize = 1;
 		Set<String> kmers = new HashSet<String>();
 
 		for (int i = 0; i < text.length() - kmerSize; i++) {
