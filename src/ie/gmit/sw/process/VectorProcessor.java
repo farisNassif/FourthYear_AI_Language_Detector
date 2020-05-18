@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ie.gmit.sw.language.Language;
+import ie.gmit.sw.util.Stopwatch;
 import ie.gmit.sw.util.Utilities;
 
 public class VectorProcessor {
@@ -21,13 +22,18 @@ public class VectorProcessor {
 
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
+		Stopwatch timer = new Stopwatch();
+
 		/* Delete file if exists */
 		if (data.delete()) {
 			System.out.println("Deleted the file: " + data.getName());
 		} else {
 			System.out.println("No file existed to delete");
 		}
+		timer.start();
 		new VectorProcessor().parse();
+		timer.stop();
+		System.out.println("Data file parsed, processed and hashed in " + timer.toString());
 	}
 
 	public void parse() throws Throwable {
@@ -45,7 +51,7 @@ public class VectorProcessor {
 	/* Processes the language associated text */
 	public void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[250];
+		double[] vector = new double[25];
 
 		String[] record = line.split("@");
 
@@ -76,7 +82,7 @@ public class VectorProcessor {
 			bw.write(df.format(vector[i]) + ",");
 		}
 
-		/* Loop 235 times, this will append the language as true / false */
+		/* Loop 235 times, this will append the language as true / false (0/1) */
 		for (int i = 0; i < langs.length; i++) {
 
 			if (!langs[i].toString().equals(lang)) {
@@ -91,7 +97,6 @@ public class VectorProcessor {
 			if (i != langs.length - 1) {
 				bw.write(",");
 			}
-
 		}
 
 		/* For each language being entered .. */
@@ -110,5 +115,4 @@ public class VectorProcessor {
 
 		return kmers;
 	}
-
 }

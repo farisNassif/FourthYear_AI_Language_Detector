@@ -45,7 +45,7 @@ public class NeuralNetwork {
 		network.reset();
 
 		/* Handle on the CSV file */
-		DataSetCODEC dsc = new CSVDataCODEC(new File("./datatwo.csv"), CSVFormat.DECIMAL_POINT, false, inputs, outputs,
+		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, inputs, outputs,
 				false);
 
 		MemoryDataLoader mdl = new MemoryDataLoader(dsc);
