@@ -51,7 +51,7 @@ public class VectorProcessor {
 	/* Processes the language associated text */
 	public void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[100];
+		double[] vector = new double[200];
 
 		String[] record = line.split("@");
 

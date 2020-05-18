@@ -1,8 +1,11 @@
 package ie.gmit.sw;
 
 import java.io.File;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 import org.encog.Encog;
+import org.encog.engine.network.activation.ActivationReLU;
 import org.encog.engine.network.activation.ActivationSoftMax;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
@@ -33,17 +36,16 @@ public class NeuralNetwork {
 
 	public NeuralNetwork() {
 		Language[] langs = Language.values();
-		int inputs = 100;
+		int inputs = 200;
 		int outputs = 235;
 		double minError = 0.0040; // While training, it would plateau at 0.004491100233148725
 
 		/* Neural Network Configuration */
 		BasicNetwork network = new BasicNetwork();
 		/* Input layer, amount of nodes are equal to vector size */
-		network.addLayer(new BasicLayer(new ActivationSoftMax(), true, inputs));
+		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputs));
 		/* Single hidden layer, nodes equal to sqrt of (input * output) nodes */
-		network.addLayer(new BasicLayer(new ActivationSoftMax(), true, (int) Math.sqrt(inputs * outputs)));
-		network.addLayer(new BasicLayer(new ActivationSoftMax(), true, (int) Math.sqrt(inputs * outputs)));
+		network.addLayer(new BasicLayer(new ActivationReLU(), true, (int) Math.sqrt(inputs * outputs)));
 		/* Output layer, size equal to amount of languages to be classified (235) */
 		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputs));
 		network.getStructure().finalizeStructure();
@@ -63,7 +65,7 @@ public class NeuralNetwork {
 		MLTrain train = new ResilientPropagation(network, folded);
 
 		/* (5)k-fold cross validation */
-		CrossValidationKFold cv = new CrossValidationKFold(train, 5);
+		CrossValidationKFold cv = new CrossValidationKFold(train, 6);
 
 		Stopwatch timer = new Stopwatch();
 
@@ -84,36 +86,52 @@ public class NeuralNetwork {
 
 		System.out.println(
 				"Training Done in " + epochs + " epochs with error rate " + cv.getError() + " in " + timer.toString());
-		
-		double totalValues = 0;
-		double correct = 0;
-		
+
+		int totalValues = 0;
+		int correct = 0;
+		double actual = 0;
+		int ideal = 0;
+		int res = 0;
+		int i = 0;
+		Language act;
+
 		/* Test the data */
 		for (MLDataPair data : mdlTrainingSet) {
-			/* https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf - Page 147 */
-			MLData input = data.getInput();
-			MLData actualData = data.getIdeal();
-			MLData predictData = network.compute(input);
+			/*
+			 * https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf -
+			 * Page147
+			 */
+			MLData output = network.compute(data.getInput());
+			double[] preferred = data.getIdeal().getData(); //
 
-			double actual = actualData.getData(0);
-			double predict = predictData.getData(0);
-			System.out.println(actualData.getData().length);
-			
-			/* This will loop 235 times, task is to find the language with a val of 1 */
-			for (int i = 0; i < actualData.getData().length ; i++) {
-				if (actualData.getData(i)==1) {
-					/* The output language */
-					// System.out.println(langs[i]);
+			for (i = 0; i < preferred.length; i++) {
+				if (preferred[i] == 1) {
+					ideal = i;
 				}
-				
 			}
-			
+
+			for (i = 0; i < output.getData().length; i++) {
+				if (output.getData(i) == 1) {
+					res = i;
+					if (i == ideal) {
+						correct++;
+					}
+				}
+			}
+
 			totalValues++;
-			
+
 		}
 
-		System.out.println(correct + "/" + totalValues);
-		
+		DecimalFormat decimalFormat = new DecimalFormat("##.##");
+		decimalFormat.setRoundingMode(RoundingMode.CEILING);
+
+		double percent = (double) correct / (double) totalValues;
+
+		System.out.println("\nINFO: Testing complete.");
+		System.out.println("Correct: " + correct + "/" + totalValues);
+		System.out.println("Accuracy: " + decimalFormat.format(percent * 100) + "%");
+
 		double[] in = { 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0,
 				0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0.5,
 				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.5, 0,
@@ -125,3 +143,5 @@ public class NeuralNetwork {
 		Encog.getInstance().shutdown();
 	}
 }
+
+
