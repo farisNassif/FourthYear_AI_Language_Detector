@@ -51,7 +51,7 @@ public class VectorProcessor {
 	/* Processes the language associated text */
 	public void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[200];
+		double[] vector = new double[50];
 
 		String[] record = line.split("@");
 
@@ -106,7 +106,7 @@ public class VectorProcessor {
 
 	/* Standard, for each processed line, pass it in here and return kmers */
 	public Set<String> genKmers(String text) {
-		int kmerSize = 1;
+		int kmerSize = 2;
 		Set<String> kmers = new HashSet<String>();
 
 		for (int i = 0; i < text.length() - kmerSize; i++) {
