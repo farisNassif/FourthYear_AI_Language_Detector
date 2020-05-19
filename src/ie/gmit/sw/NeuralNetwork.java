@@ -16,10 +16,13 @@ import org.encog.ml.data.buffer.MemoryDataLoader;
 import org.encog.ml.data.buffer.codec.CSVDataCODEC;
 import org.encog.ml.data.buffer.codec.DataSetCODEC;
 import org.encog.ml.data.folded.FoldedDataSet;
+import org.encog.ml.train.strategy.Greedy;
+import org.encog.ml.train.strategy.ResetStrategy;
 import org.encog.ml.train.strategy.end.EndMinutesStrategy;
 import org.encog.ml.train.strategy.end.StoppingStrategy;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.cross.CrossValidationKFold;
 import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.util.csv.CSVFormat;
@@ -42,14 +45,14 @@ public class NeuralNetwork {
 		Language[] langs = Language.values();
 		int inputs = 50;
 		int outputs = 235;
-		double minError = 0.0005; // While training, it would plateau at 0.004491100233148725
+		double minError = 0.0002;
 
 		/* Neural Network Configuration */
 		BasicNetwork network = new BasicNetwork();
 		/* Input layer, amount of nodes are equal to vector size */
-		network.addLayer(new BasicLayer(null, true, inputs));
+		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputs));
 		/* Single hidden layer, nodes equal to sqrt of (input * output) nodes */
-		network.addLayer(new BasicLayer(new ActivationReLU(), true, (int) Math.sqrt(inputs * outputs), 20));
+		network.addLayer(new BasicLayer(new ActivationBipolarSteepenedSigmoid(), true, (int) Math.sqrt(inputs * outputs)));
 		/* Output layer, size equal to amount of languages to be classified (235) */
 		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputs));
 		network.getStructure().finalizeStructure();
@@ -67,17 +70,18 @@ public class NeuralNetwork {
 
 		/* Neural Network Training config, manhattan prop with learning rate of 0.021 */
 		ResilientPropagation train = new ResilientPropagation(network, folded);
-
 		/* (5)k-fold cross validation */
-		//CrossValidationKFold cv = new CrossValidationKFold(train, 5);
+		new CrossValidationKFold(train,5);
+		
 		/* Greedy strategy, if last iteration didn't improve training, discard it */
-
+		
 		Stopwatch timer = new Stopwatch();
 
 		timer.start();
 
 		/* Train */
 		EncogUtility.trainToError(train, minError);
+		
 
 		/* Declare the end of training */
 		timer.stop();

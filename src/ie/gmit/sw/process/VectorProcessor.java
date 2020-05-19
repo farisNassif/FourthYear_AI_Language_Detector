@@ -19,7 +19,7 @@ public class VectorProcessor {
 	private DecimalFormat df = new DecimalFormat("###.###");
 	Language[] langs = Language.values();
 	static File data = new File("./data.csv");
-	
+
 	/* Temp runner */
 	public static void main(String[] args) throws Throwable {
 		Stopwatch timer = new Stopwatch();
@@ -51,7 +51,7 @@ public class VectorProcessor {
 	/* Processes the language associated text */
 	public void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[50];
+		double[] vector = new double[10];
 
 		String[] record = line.split("@");
 
@@ -64,12 +64,13 @@ public class VectorProcessor {
 		String text = record[0].toLowerCase();
 		String lang = record[1];
 
-		/* Generate (n) kmers and loop (n) times */
-		for (String kmer : genKmers(text)) {
-			/* Increment the vector value at that index by 1 */
-			vector[kmer.hashCode() % vector.length]++;
+		for (int i = 1; i != 3; i++) {
+			/* Generate (n) kmers and loop (n) times */
+			for (String kmer : genKmers(text, i)) {
+				/* Increment the vector value at that index by 1 */
+				vector[kmer.hashCode() % vector.length]++;
+			}
 		}
-
 		/* Normalize it */
 		vector = Utilities.normalize(vector, 0, 1);
 
@@ -105,8 +106,7 @@ public class VectorProcessor {
 	}
 
 	/* Standard, for each processed line, pass it in here and return kmers */
-	public Set<String> genKmers(String text) {
-		int kmerSize = 2;
+	public Set<String> genKmers(String text, int kmerSize) {
 		Set<String> kmers = new HashSet<String>();
 
 		for (int i = 0; i < text.length() - kmerSize; i++) {
