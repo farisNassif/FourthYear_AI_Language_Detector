@@ -12,6 +12,7 @@ public class ConsoleMenu {
 	public void MainMenu() {
 		int option;
 		boolean loop = true;
+		System.out.println("---------- Main Menu ----------");
 		System.out.println("Press 1 : Neural Network Options");
 		System.out.println("Press 2 : Vector Hashing / Ngram Options");
 		System.out.println("Press 3 : Classification Options");
@@ -21,7 +22,7 @@ public class ConsoleMenu {
 		while (loop == true) {
 			switch (option) {
 			case 1:
-				System.out.println("Neural Network Opts");
+				NeuralNetworkMenu();
 				break;
 			case 2:
 				System.out.println("Vector Hashing Opts");
@@ -31,13 +32,14 @@ public class ConsoleMenu {
 				break;
 			case 9:
 				loop = false;
-				System.out.println("Quitting Program ...");
+				System.out.println("\n*Quitting Program ...");
 				break;
 			default:
 				System.out.println("Invalid input, try again.");
 			}
 
 			if (option != 9) {
+				System.out.println("\n---------- Main Menu ----------");
 				System.out.println("Press 1 : Neural Network Options");
 				System.out.println("Press 2 : Vector Hashing / Ngram Options");
 				System.out.println("Press 3 : Classification Options");
@@ -47,6 +49,46 @@ public class ConsoleMenu {
 
 		}
 		scanner.close();
+	}
+
+	public void NeuralNetworkMenu() {
+		int option;
+		boolean loop = true;
+		System.out.println("\n------ Neural Network Menu ------");
+		System.out.println("Press 1 : Neural Network Option 1");
+		System.out.println("Press 2 : Neural Network Option 2");
+		System.out.println("Press 3 : Neural Network Option 3");
+		System.out.println("Press 9 : Go back to the Main Menu");
+		option = scanner.nextInt();
+
+		while (loop == true) {
+			switch (option) {
+			case 1:
+				System.out.println("Neural Network Option 1");
+				break;
+			case 2:
+				System.out.println("Neural Network Option 2");
+				break;
+			case 3:
+				System.out.println("Neural Network Option 3");
+				break;
+			case 9:
+				loop = false;
+				System.out.println("Going Back ...");
+				break;
+			default:
+				System.out.println("Invalid input, try again.");
+			}
+
+			if (option != 9) {
+				System.out.println("\n------ Neural Network Menu ------");
+				System.out.println("Press 1 : Neural Network Option 1");
+				System.out.println("Press 2 : Neural Network Option 2");
+				System.out.println("Press 3 : Neural Network Option 3");
+				System.out.println("Press 9 : Go back to the Main Menu");
+				option = scanner.nextInt();
+			}
+		}
 	}
 }
 
