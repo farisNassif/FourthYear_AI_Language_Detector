@@ -4,11 +4,10 @@ import java.util.Scanner;
 
 import ie.gmit.sw.language.Language;
 
-/* Simple class that just handles the program menu */
+/* Simple class that just handles the programs menus */
 public class ConsoleMenu {
 	Scanner scanner = new Scanner(System.in);
 
-	/* Handles user input with a bog standard switch */
 	public void MainMenu() {
 		int option;
 		boolean loop = true;
@@ -25,7 +24,7 @@ public class ConsoleMenu {
 				NeuralNetworkMenu();
 				break;
 			case 2:
-				System.out.println("Vector Hashing Opts");
+				VectorMenu();
 				break;
 			case 3:
 				System.out.println("Classification Opts");
@@ -90,15 +89,44 @@ public class ConsoleMenu {
 			}
 		}
 	}
-}
 
-/*
- * Each of the languages in the enum Language can be represented as a number
- * between 0 and 234. You can map the output of the neural network and the
- * training data label to / from the language using the following. Eg. index 0
- * maps to Achinese, i.e. langs[0].
- */
-//Language[] langs = Language.values(); // Only call this once...
-//for (int i = 0; i < langs.length; i++) {
-//	System.out.println(i + "-->" + langs[i]);
-//}
+	public void VectorMenu() {
+		int option;
+		boolean loop = true;
+		System.out.println("\n----- Vector / Ngram Menu -----");
+		System.out.println("Press 1 : Vector / Ngram Option 1");
+		System.out.println("Press 2 : Vector / Ngram Option 2");
+		System.out.println("Press 3 : Vector / Ngram Option 3");
+		System.out.println("Press 9 : Go back to the Main Menu");
+		option = scanner.nextInt();
+
+		while (loop == true) {
+			switch (option) {
+			case 1:
+				System.out.println("Vector / Ngram Option 1");
+				break;
+			case 2:
+				System.out.println("Vector / Ngram Option 2");
+				break;
+			case 3:
+				System.out.println("Vector / Ngram Option 3");
+				break;
+			case 9:
+				loop = false;
+				System.out.println("Going Back ...");
+				break;
+			default:
+				System.out.println("Invalid input, try again.");
+			}
+
+			if (option != 9) {
+				System.out.println("\n----- Vector / Ngram Menu -----");
+				System.out.println("Press 1 : Vector / Ngram Option 1");
+				System.out.println("Press 2 : Vector / Ngram Option 2");
+				System.out.println("Press 3 : Vector / Ngram Option 3");
+				System.out.println("Press 9 : Go back to the Main Menu");
+				option = scanner.nextInt();
+			}
+		}
+	}
+}
