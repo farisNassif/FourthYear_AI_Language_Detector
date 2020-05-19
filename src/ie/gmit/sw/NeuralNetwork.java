@@ -36,31 +36,45 @@ import ie.gmit.sw.util.Stopwatch;
  * Assisted with NN Development - https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf 
  */
 public class NeuralNetwork {
+	public static int inputNodes;
+	public static boolean save = false;
 
 	public static void main(String[] args) {
-		new NeuralNetwork();
+		new NeuralNetwork(false, 100);
 	}
 
-	public NeuralNetwork() {
+	public NeuralNetwork(boolean save, int inputNodes) {
+		NeuralNetwork.inputNodes = inputNodes;
+		NeuralNetwork.save = save;
+
+		GenNeuralNetwork();
+	}
+
+	public void GenNeuralNetwork() {
 		Language[] langs = Language.values();
-		int inputs = 50;
-		int outputs = 235;
+		int outputNodes = 235;
 		double minError = 0.0002;
+
+		System.out.println("Generating Neural Network ..");
 
 		/* Neural Network Configuration */
 		BasicNetwork network = new BasicNetwork();
 		/* Input layer, amount of nodes are equal to vector size */
-		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputs));
+		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputNodes));
 		/* Single hidden layer, nodes equal to sqrt of (input * output) nodes */
-		network.addLayer(new BasicLayer(new ActivationBipolarSteepenedSigmoid(), true, (int) Math.sqrt(inputs * outputs)));
+		network.addLayer(new BasicLayer(new ActivationBipolarSteepenedSigmoid(), true,
+				(int) Math.sqrt(inputNodes * outputNodes)));
 		/* Output layer, size equal to amount of languages to be classified (235) */
-		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputs));
+		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputNodes));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
+		System.out.println("Neural Network Generated, Reporting Topology ..");
+		System.out.println("[ReLU(" + inputNodes + ")]-->[BipolarSteepenedSigmoid("
+				+ (int) Math.sqrt(inputNodes * outputNodes) + ")]-->[ActivationSoftMax(" + outputNodes + ")]\n");
 		/* Handle on the CSV file */
-		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, inputs, outputs,
-				false);
+		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, inputNodes,
+				outputNodes, false);
 
 		MemoryDataLoader mdl = new MemoryDataLoader(dsc);
 		/* Configure the training set */
@@ -71,17 +85,17 @@ public class NeuralNetwork {
 		/* Neural Network Training config, manhattan prop with learning rate of 0.021 */
 		ResilientPropagation train = new ResilientPropagation(network, folded);
 		/* (5)k-fold cross validation */
-		new CrossValidationKFold(train,5);
-		
+		new CrossValidationKFold(train, 5);
+
 		/* Greedy strategy, if last iteration didn't improve training, discard it */
-		
+
 		Stopwatch timer = new Stopwatch();
 
 		timer.start();
 
+		System.out.println("Training will terminate at 600, X iterations or when no improvement is observed");
 		/* Train */
 		EncogUtility.trainToError(train, minError);
-		
 
 		/* Declare the end of training */
 		timer.stop();
@@ -92,7 +106,7 @@ public class NeuralNetwork {
 		int i = 0;
 		int ideal = 0;
 		int res = 0;
-		
+
 		/* Test the data */
 		for (MLDataPair data : mdlTrainingSet) {
 			/*
@@ -117,7 +131,6 @@ public class NeuralNetwork {
 				}
 
 			}
-			
 
 			totalValues++;
 
@@ -132,9 +145,10 @@ public class NeuralNetwork {
 		System.out.println("Correct: " + correct + "/" + totalValues);
 		System.out.println("Accuracy: " + decimalFormat.format(percent * 100) + "%");
 
-		//System.out.println("\nINFO: Testing complete.");
-		//System.out.println("Correct: 8664" + "/" + totalValues);
-		//System.out.println("Accuracy: 73.8052645%"); // + decimalFormat.format(percent * 100) + "%");
+		// System.out.println("\nINFO: Testing complete.");
+		// System.out.println("Correct: 8664" + "/" + totalValues);
+		// System.out.println("Accuracy: 73.8052645%"); // +
+		// decimalFormat.format(percent * 100) + "%");
 
 		double[] in = { 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0,
 				0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0.5,

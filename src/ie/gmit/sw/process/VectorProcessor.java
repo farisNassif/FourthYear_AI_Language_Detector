@@ -48,8 +48,8 @@ public class VectorProcessor {
 		}
 
 		timer.stop();
-		System.out.println("Data file parsed, processed and hashed in " + timer.toString() + ". Saved to file "
-				+ data.getName());
+		System.out.println(
+				"Data file parsed, processed and hashed in " + timer.toString() + ". Saved to file " + data.getName());
 	}
 
 	private void parse() throws Throwable {

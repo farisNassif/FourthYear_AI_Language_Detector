@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import ie.gmit.sw.NeuralNetwork;
 import ie.gmit.sw.process.VectorProcessor;
 
 /* Simple class that just handles the programs menus */
@@ -57,7 +58,7 @@ public class ConsoleMenu {
 		int option;
 		boolean loop = true;
 		System.out.println("\n------ Neural Network Menu ------");
-		System.out.println("Press 1 : Neural Network Option 1");
+		System.out.println("Press 1 : Create and Train a Neural Network on the fly");
 		System.out.println("Press 2 : Neural Network Option 2");
 		System.out.println("Press 3 : Neural Network Option 3");
 		System.out.println("Press 9 : Go back to the Main Menu");
@@ -66,7 +67,7 @@ public class ConsoleMenu {
 		while (loop == true) {
 			switch (option) {
 			case 1:
-				System.out.println("Neural Network Option 1");
+				new NeuralNetwork(false, 100);
 				break;
 			case 2:
 				System.out.println("Neural Network Option 2");
@@ -112,7 +113,7 @@ public class ConsoleMenu {
 			case 1:
 				System.out.println("Specify Max Vector Size (Ideally 125 - 200)");
 				vectorSize = scanner.nextInt();
-				System.out.println("K-mer size (0 / 1 / 2 / 3 / 4, Anything else may or may not crash everything)");
+				System.out.println("K-mer size (1 / 2 / 3 / 4, Anything else may or may not crash everything)");
 				option = scanner.nextInt();
 				kmers = option;
 
@@ -134,7 +135,7 @@ public class ConsoleMenu {
 
 			if (option != 9) {
 				System.out.println("\n----- Vector / Ngram Menu -----");
-				System.out.println("Press 1 : Vector / Ngram Option 1");
+				System.out.println("Press 1 : Create a new Vector & specify sizes");
 				System.out.println("Press 2 : Vector / Ngram Option 2");
 				System.out.println("Press 3 : Vector / Ngram Option 3");
 				System.out.println("Press 9 : Go back to the Main Menu");
