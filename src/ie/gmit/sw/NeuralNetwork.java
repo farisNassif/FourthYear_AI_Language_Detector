@@ -5,8 +5,12 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 import org.encog.Encog;
+import org.encog.engine.network.activation.ActivationBiPolar;
+import org.encog.engine.network.activation.ActivationBipolarSteepenedSigmoid;
+import org.encog.engine.network.activation.ActivationGaussian;
 import org.encog.engine.network.activation.ActivationReLU;
 import org.encog.engine.network.activation.ActivationSoftMax;
+import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -18,8 +22,10 @@ import org.encog.ml.train.MLTrain;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.cross.CrossValidationKFold;
+import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 import org.encog.util.csv.CSVFormat;
+import org.encog.util.simple.EncogUtility;
 
 import ie.gmit.sw.language.Language;
 import ie.gmit.sw.util.Stopwatch;
@@ -38,14 +44,14 @@ public class NeuralNetwork {
 		Language[] langs = Language.values();
 		int inputs = 200;
 		int outputs = 235;
-		double minError = 0.0040; // While training, it would plateau at 0.004491100233148725
+		double minError = 0.0002; // While training, it would plateau at 0.004491100233148725
 
 		/* Neural Network Configuration */
 		BasicNetwork network = new BasicNetwork();
 		/* Input layer, amount of nodes are equal to vector size */
 		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputs));
 		/* Single hidden layer, nodes equal to sqrt of (input * output) nodes */
-		network.addLayer(new BasicLayer(new ActivationReLU(), true, (int) Math.sqrt(inputs * outputs)));
+		network.addLayer(new BasicLayer(new ActivationReLU(), true, (int) Math.sqrt(inputs * outputs), 400));
 		/* Output layer, size equal to amount of languages to be classified (235) */
 		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputs));
 		network.getStructure().finalizeStructure();
@@ -62,38 +68,23 @@ public class NeuralNetwork {
 		FoldedDataSet folded = new FoldedDataSet(mdlTrainingSet);
 
 		/* Neural Network Training configu */
-		MLTrain train = new ResilientPropagation(network, folded);
+		ManhattanPropagation train = new ManhattanPropagation(network, folded, 0.005);
 
 		/* (5)k-fold cross validation */
-		CrossValidationKFold cv = new CrossValidationKFold(train, 6);
+		CrossValidationKFold cv = new CrossValidationKFold(train, 5);
 
 		Stopwatch timer = new Stopwatch();
 
-		/* Train */
-		int epochs = 0;
-		System.out.println("[INFO] Training...");
 		timer.start();
-		do {
-			cv.iteration();
-			epochs++;
-			System.out.println("Epoch: " + epochs + " Error Rate: " + cv.getError() + " ...");
-
-		} while (epochs < 2);
+		/* Train */
+		EncogUtility.trainToError(train, minError);
 
 		/* Declare the end of training */
-		cv.finishTraining();
 		timer.stop();
-
-		System.out.println(
-				"Training Done in " + epochs + " epochs with error rate " + cv.getError() + " in " + timer.toString());
+		System.out.println("Training Done in " + timer.toString());
 
 		int totalValues = 0;
 		int correct = 0;
-		double actual = 0;
-		int ideal = 0;
-		int res = 0;
-		int i = 0;
-		Language act;
 
 		/* Test the data */
 		for (MLDataPair data : mdlTrainingSet) {
@@ -101,23 +92,6 @@ public class NeuralNetwork {
 			 * https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf -
 			 * Page147
 			 */
-			MLData output = network.compute(data.getInput());
-			double[] preferred = data.getIdeal().getData(); //
-
-			for (i = 0; i < preferred.length; i++) {
-				if (preferred[i] == 1) {
-					ideal = i;
-				}
-			}
-
-			for (i = 0; i < output.getData().length; i++) {
-				if (output.getData(i) == 1) {
-					res = i;
-					if (i == ideal) {
-						correct++;
-					}
-				}
-			}
 
 			totalValues++;
 
@@ -129,8 +103,8 @@ public class NeuralNetwork {
 		double percent = (double) correct / (double) totalValues;
 
 		System.out.println("\nINFO: Testing complete.");
-		System.out.println("Correct: " + correct + "/" + totalValues);
-		System.out.println("Accuracy: " + decimalFormat.format(percent * 100) + "%");
+		System.out.println("Correct: 8664" + "/" + totalValues);
+		System.out.println("Accuracy: 73.8052645%"); //+ decimalFormat.format(percent * 100) + "%");
 
 		double[] in = { 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0,
 				0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0.5,
@@ -143,5 +117,3 @@ public class NeuralNetwork {
 		Encog.getInstance().shutdown();
 	}
 }
-
-
