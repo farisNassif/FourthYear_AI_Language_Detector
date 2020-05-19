@@ -55,10 +55,14 @@ public class ConsoleMenu {
 
 	/* Neural Network Related Items */
 	public void NeuralNetworkMenu() {
+		/* Params for NN */
+		int inputNodes = 0;
+		int save = 0;
+
 		int option;
 		boolean loop = true;
 		System.out.println("\n------ Neural Network Menu ------");
-		System.out.println("Press 1 : Create and Train a Neural Network on the fly");
+		System.out.println("Press 1 : Create and Train a Neural Network on the fly (And optional save)");
 		System.out.println("Press 2 : Neural Network Option 2");
 		System.out.println("Press 3 : Neural Network Option 3");
 		System.out.println("Press 9 : Go back to the Main Menu");
@@ -67,7 +71,11 @@ public class ConsoleMenu {
 		while (loop == true) {
 			switch (option) {
 			case 1:
-				new NeuralNetwork(false, 100);
+				System.out.println("How many input nodes should the NN have? (Should be equal to vector size)");
+				inputNodes = scanner.nextInt();
+				System.out.println("Save: Press 1 | Otherwise : Press 0");
+				save = scanner.nextInt();
+				new NeuralNetwork(save, inputNodes);
 				break;
 			case 2:
 				System.out.println("Neural Network Option 2");
@@ -85,7 +93,7 @@ public class ConsoleMenu {
 
 			if (option != 9) {
 				System.out.println("\n------ Neural Network Menu ------");
-				System.out.println("Press 1 : Neural Network Option 1");
+				System.out.println("Press 1 : Create and Train a Neural Network on the fly (And optional save)");
 				System.out.println("Press 2 : Neural Network Option 2");
 				System.out.println("Press 3 : Neural Network Option 3");
 				System.out.println("Press 9 : Go back to the Main Menu");
@@ -99,6 +107,7 @@ public class ConsoleMenu {
 		/* Params for vector Processor */
 		int vectorSize;
 		int kmers;
+
 		int option;
 		boolean loop = true;
 		System.out.println("\n----- Vector / Ngram Menu -----");

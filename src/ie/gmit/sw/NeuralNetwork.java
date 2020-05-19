@@ -30,6 +30,7 @@ import org.encog.util.simple.EncogUtility;
 
 import ie.gmit.sw.language.Language;
 import ie.gmit.sw.util.Stopwatch;
+import ie.gmit.sw.util.Utilities;
 
 /* 
  * Class that creates the NN topology, trains, tests and saves it.
@@ -37,13 +38,17 @@ import ie.gmit.sw.util.Stopwatch;
  */
 public class NeuralNetwork {
 	public static int inputNodes;
-	public static boolean save = false;
+	public static int save;
 
 	public static void main(String[] args) {
-		new NeuralNetwork(false, 100);
+		new NeuralNetwork(0, 100);
 	}
 
-	public NeuralNetwork(boolean save, int inputNodes) {
+	public NeuralNetwork(int save, int inputNodes) {
+		if (save != 1) {
+			save = 0;
+		}
+
 		NeuralNetwork.inputNodes = inputNodes;
 		NeuralNetwork.save = save;
 
@@ -100,6 +105,11 @@ public class NeuralNetwork {
 		/* Declare the end of training */
 		timer.stop();
 		System.out.println("Training Done in " + timer.toString());
+
+		if (NeuralNetwork.save == 1) {
+			System.out.println("Neural Network saved as 'NeuralNetwork.nn");
+			Utilities.saveNeuralNetwork(network, "./NeuralNetwork.nn");
+		}
 
 		int totalValues = 0;
 		int correct = 0;
