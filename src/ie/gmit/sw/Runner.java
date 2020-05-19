@@ -1,9 +1,5 @@
 package ie.gmit.sw;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-
 import ie.gmit.sw.ui.ConsoleMenu;
 
 public class Runner {

@@ -15,14 +15,21 @@ import ie.gmit.sw.util.Stopwatch;
 import ie.gmit.sw.util.Utilities;
 
 public class VectorProcessor {
+	/* Dirty static vars, will make everything nicer if theres time */
+	private static int kmers;
+	private static int vectorSize;
+	private static File data = new File("./data.csv");
 
 	private DecimalFormat df = new DecimalFormat("###.###");
 	Language[] langs = Language.values();
-	static File data = new File("./data.csv");
 
-	/* Temp runner */
-	public static void main(String[] args) throws Throwable {
+	public VectorProcessor(int kmers, int vectorSize) {
+		VectorProcessor.kmers = kmers;
+		VectorProcessor.vectorSize = vectorSize;
+
 		Stopwatch timer = new Stopwatch();
+
+		System.out.println("Checking to see if a csv file already exists .. ");
 
 		/* Delete file if exists */
 		if (data.delete()) {
@@ -30,13 +37,22 @@ public class VectorProcessor {
 		} else {
 			System.out.println("No file existed to delete");
 		}
+
+		System.out.println("Processing Vector[" + vectorSize + "] with k-mers of size " + kmers);
 		timer.start();
-		new VectorProcessor().parse();
+
+		try {
+			parse();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
 		timer.stop();
-		System.out.println("Data file parsed, processed and hashed in " + timer.toString());
+		System.out.println("Data file parsed, processed and hashed in " + timer.toString() + ". Saved to file "
+				+ data.getName());
 	}
 
-	public void parse() throws Throwable {
+	private void parse() throws Throwable {
 		BufferedReader bufferedReader = new BufferedReader(
 				new InputStreamReader(new FileInputStream("./wili-2018-Small-11750-Edited.txt")));
 		String line = null;
@@ -49,9 +65,9 @@ public class VectorProcessor {
 	}
 
 	/* Processes the language associated text */
-	public void process(String line) throws Exception {
+	private void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[10];
+		double[] vector = new double[vectorSize];
 
 		String[] record = line.split("@");
 
@@ -64,13 +80,12 @@ public class VectorProcessor {
 		String text = record[0].toLowerCase();
 		String lang = record[1];
 
-		for (int i = 1; i != 3; i++) {
-			/* Generate (n) kmers and loop (n) times */
-			for (String kmer : genKmers(text, i)) {
-				/* Increment the vector value at that index by 1 */
-				vector[kmer.hashCode() % vector.length]++;
-			}
+		/* Generate (n) kmers and loop (n) times */
+		for (String kmer : genKmers(text, VectorProcessor.kmers)) {
+			/* Increment the vector value at that index by 1 */
+			vector[kmer.hashCode() % vector.length]++;
 		}
+
 		/* Normalize it */
 		vector = Utilities.normalize(vector, 0, 1);
 
@@ -106,7 +121,7 @@ public class VectorProcessor {
 	}
 
 	/* Standard, for each processed line, pass it in here and return kmers */
-	public Set<String> genKmers(String text, int kmerSize) {
+	private Set<String> genKmers(String text, int kmerSize) {
 		Set<String> kmers = new HashSet<String>();
 
 		for (int i = 0; i < text.length() - kmerSize; i++) {
