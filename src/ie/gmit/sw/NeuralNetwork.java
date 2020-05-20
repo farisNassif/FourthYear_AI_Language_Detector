@@ -17,7 +17,9 @@ import org.encog.ml.data.buffer.codec.CSVDataCODEC;
 import org.encog.ml.data.buffer.codec.DataSetCODEC;
 import org.encog.ml.data.folded.FoldedDataSet;
 import org.encog.ml.train.strategy.Greedy;
+import org.encog.ml.train.strategy.HybridStrategy;
 import org.encog.ml.train.strategy.ResetStrategy;
+import org.encog.ml.train.strategy.end.EndIterationsStrategy;
 import org.encog.ml.train.strategy.end.EndMinutesStrategy;
 import org.encog.ml.train.strategy.end.StoppingStrategy;
 import org.encog.neural.networks.BasicNetwork;
@@ -34,14 +36,15 @@ import ie.gmit.sw.util.Utilities;
 
 /* 
  * Class that creates the NN topology, trains, tests and saves it.
- * Assisted with NN Development - https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf 
+ * Helped with NN construction - https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf 
  */
 public class NeuralNetwork {
 	public static int inputNodes;
 	public static int save;
+	DecimalFormat trainFormat = new DecimalFormat("#.######");
 
 	public static void main(String[] args) {
-		new NeuralNetwork(0, 100);
+		new NeuralNetwork(1, 285);
 	}
 
 	public NeuralNetwork(int save, int inputNodes) {
@@ -52,13 +55,13 @@ public class NeuralNetwork {
 		NeuralNetwork.inputNodes = inputNodes;
 		NeuralNetwork.save = save;
 
-		GenNeuralNetwork();
+		GenTrainNeuralNetwork();
 	}
 
-	public void GenNeuralNetwork() {
-		Language[] langs = Language.values();
+	public void GenTrainNeuralNetwork() {
 		int outputNodes = 235;
-		double minError = 0.0002;
+		int hiddenNodes = (int) Math.sqrt(inputNodes * outputNodes);
+		double minError = 0.0022;
 
 		System.out.println("Generating Neural Network ..");
 
@@ -67,20 +70,19 @@ public class NeuralNetwork {
 		/* Input layer, amount of nodes are equal to vector size */
 		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputNodes));
 		/* Single hidden layer, nodes equal to sqrt of (input * output) nodes */
-		network.addLayer(new BasicLayer(new ActivationBipolarSteepenedSigmoid(), true,
-				(int) Math.sqrt(inputNodes * outputNodes)));
+		network.addLayer(new BasicLayer(new ActivationTANH(), true, hiddenNodes, 125));
 		/* Output layer, size equal to amount of languages to be classified (235) */
 		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputNodes));
 		network.getStructure().finalizeStructure();
 		network.reset();
 
 		System.out.println("Neural Network Generated, Reporting Topology ..");
-		System.out.println("[ReLU(" + inputNodes + ")]-->[BipolarSteepenedSigmoid("
-				+ (int) Math.sqrt(inputNodes * outputNodes) + ")]-->[ActivationSoftMax(" + outputNodes + ")]\n");
+		System.out.println("[ReLU(" + inputNodes + ")]-->[BipolarSteepenedSigmoid(" + hiddenNodes
+				+ ")]-->[ActivationSoftMax(" + outputNodes + ")]\n");
+
 		/* Handle on the CSV file */
 		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, inputNodes,
 				outputNodes, false);
-
 		MemoryDataLoader mdl = new MemoryDataLoader(dsc);
 		/* Configure the training set */
 		MLDataSet mdlTrainingSet = mdl.external2Memory();
@@ -89,28 +91,47 @@ public class NeuralNetwork {
 
 		/* Neural Network Training config, manhattan prop with learning rate of 0.021 */
 		ResilientPropagation train = new ResilientPropagation(network, folded);
+		// ManhattanPropagation train_manh = new ManhattanPropagation(network, folded,
+		// 0.021);
+
 		/* (5)k-fold cross validation */
-		new CrossValidationKFold(train, 5);
+		CrossValidationKFold kfold_train = new CrossValidationKFold(train, 5);
 
 		/* Greedy strategy, if last iteration didn't improve training, discard it */
 
-		Stopwatch timer = new Stopwatch();
+		Stopwatch trainingTimer = new Stopwatch();
+		trainingTimer.start();
 
-		timer.start();
+		System.out.println("Training will terminate at 600 seconds, X iterations or when no improvement is observed");
 
-		System.out.println("Training will terminate at 600, X iterations or when no improvement is observed");
 		/* Train */
-		EncogUtility.trainToError(train, minError);
+		int iteration = 1;
+		do {
+			kfold_train.iteration();
+			iteration++;
+			System.out.println(
+					"Iteration #" + iteration + " | Current Error: " + trainFormat.format(kfold_train.getError() * 100)
+							+ "% | Target Error: " + trainFormat.format(minError * 100) + "% | Time Elapsed "
+							+ trainingTimer.elapsedSeconds() + " seconds");
+		} while (iteration != 4);
 
 		/* Declare the end of training */
-		timer.stop();
-		System.out.println("Training Done in " + timer.toString());
+		kfold_train.finishTraining();
+		trainingTimer.stop();
+		System.out.println("Training Done in " + trainingTimer.toString());
 
+		/* Optional save */
 		if (NeuralNetwork.save == 1) {
 			System.out.println("Neural Network saved as 'NeuralNetwork.nn");
 			Utilities.saveNeuralNetwork(network, "./NeuralNetwork.nn");
 		}
 
+		/* Stop Encog running */
+		Encog.getInstance().shutdown();
+	}
+
+	/* Test */
+	public void TestNN(MLDataPair mdlTrainingSet[], BasicNetwork network) {
 		int totalValues = 0;
 		int correct = 0;
 		int i = 0;
@@ -141,9 +162,7 @@ public class NeuralNetwork {
 				}
 
 			}
-
 			totalValues++;
-
 		}
 
 		DecimalFormat decimalFormat = new DecimalFormat("##.##");
@@ -166,8 +185,6 @@ public class NeuralNetwork {
 				0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0.5 };
 
 		double[] out = new double[235];
-
-		/* Stop Encog running */
-		Encog.getInstance().shutdown();
 	}
+
 }

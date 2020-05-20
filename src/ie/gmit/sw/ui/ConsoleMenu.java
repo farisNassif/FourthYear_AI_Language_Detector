@@ -1,8 +1,6 @@
 package ie.gmit.sw.ui;
 
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
 import ie.gmit.sw.NeuralNetwork;
 import ie.gmit.sw.process.VectorProcessor;
