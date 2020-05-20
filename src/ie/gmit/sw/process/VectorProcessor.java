@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,42 +16,57 @@ import ie.gmit.sw.util.Stopwatch;
 import ie.gmit.sw.util.Utilities;
 
 public class VectorProcessor {
-	/* Dirty static vars, will make everything nicer if theres time */
-	private static int kmers;
-	private static int vectorSize;
-	private static File data = new File("./data.csv");
+	private int kmers;
+	private int vectorSize;
+	private File data = new File("./data.csv");
+
+	public int getKmers() {
+		return kmers;
+	}
+
+	public void setKmers(int kmers) {
+		this.kmers = kmers;
+	}
+
+	public int getVectorSize() {
+		return vectorSize;
+	}
+
+	public void setVectorSize(int vectorSize) {
+		this.vectorSize = vectorSize;
+	}
 
 	private DecimalFormat df = new DecimalFormat("###.###");
 	Language[] langs = Language.values();
 
 	public VectorProcessor(int kmers, int vectorSize) {
-		VectorProcessor.kmers = kmers;
-		VectorProcessor.vectorSize = vectorSize;
+		this.kmers = kmers;
+		this.vectorSize = vectorSize;
 
 		Stopwatch timer = new Stopwatch();
 
 		System.out.println("Checking to see if a csv file already exists .. ");
 
 		/* Delete file if exists */
-		data.delete();
+		this.data.delete();
 
 		System.out.println("Processing Vector[" + vectorSize + "] with k-mers of size " + kmers);
 		timer.start();
 
 		try {
 			parse();
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		timer.stop();
-		System.out.println(
-				"Data file parsed, processed and hashed in " + timer.toString() + ". Saved to file " + data.getName());
+		System.out.println("Data file parsed, processed and hashed in " + timer.toString() + ". Saved to file "
+				+ this.data.getName());
 	}
 
-	private void parse() throws Throwable {
-		BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(new FileInputStream("./wili-2018-Small-11750-Edited.txt")));
+	private void parse() throws Exception {
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+				new FileInputStream("./wili-2018-Small-11750-Edited.txt"), StandardCharsets.ISO_8859_1));
 		String line = null;
 		while ((line = bufferedReader.readLine()) != null) {
 			/* For each line of text in the document .. */
@@ -63,7 +79,7 @@ public class VectorProcessor {
 	/* Processes the language associated text */
 	private void process(String line) throws Exception {
 		/* New vector each iteration */
-		double[] vector = new double[vectorSize];
+		double[] vector = new double[getVectorSize()];
 
 		String[] record = line.split("@");
 
@@ -77,10 +93,11 @@ public class VectorProcessor {
 		String lang = record[1];
 
 		/* Generate (n) kmers and loop (n) times */
-		for (String kmer : genKmers(text, VectorProcessor.kmers)) {
+		for (String kmer : genKmers(text, getKmers())) {
 			/* Increment the vector value at that index by 1 */
 			vector[kmer.hashCode() % vector.length]++;
 		}
+
 		/* Normalize it */
 		vector = Utilities.normalize(vector, 0, 1);
 

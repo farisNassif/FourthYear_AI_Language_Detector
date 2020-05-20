@@ -1,4 +1,4 @@
-package ie.gmit.sw;
+package ie.gmit.sw.neuralnetwork;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,28 +42,16 @@ import ie.gmit.sw.util.Utilities;
 
 /* 
  * Class that creates the NN topology, trains, tests and saves it.
- * Helped with NN construction - https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf 
+ * Helped a lot - https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf 
  */
 public class NeuralNetwork {
-	public static int inputNodes;
-	public static int save;
 	DecimalFormat trainFormat = new DecimalFormat("#.######");
 
-	public NeuralNetwork(int save, int inputNodes) {
-		if (save != 1) {
-			save = 0;
-		}
-
-		NeuralNetwork.inputNodes = inputNodes;
-		NeuralNetwork.save = save;
-
-		GenTrainNeuralNetwork();
-	}
-
-	public void GenTrainNeuralNetwork() {
+	/* Constructs, trains and returns a BasicNetwork */
+	public BasicNetwork GenTrainNeuralNetwork(int save, int inputNodes) {
 		int outputNodes = 235;
 		int hiddenNodes = (int) Math.sqrt(inputNodes * outputNodes);
-		double minError = 0.0022;
+		double minError = 0.002;
 
 		System.out.println("Generating Neural Network ..");
 
@@ -78,6 +66,7 @@ public class NeuralNetwork {
 		network.getStructure().finalizeStructure();
 		network.reset();
 
+		/* Some topology information .. */
 		System.out.println("Neural Network Generated, Reporting Topology ..\n");
 		System.out.println("[ReLU(" + inputNodes + ")]-->[BipolarSteepenedSigmoid(" + hiddenNodes
 				+ ")]-->[ActivationSoftMax(" + outputNodes + ")]\n");
@@ -98,8 +87,6 @@ public class NeuralNetwork {
 
 		/* (5)k-fold cross validation */
 		CrossValidationKFold kfold_train = new CrossValidationKFold(train, 5);
-
-		/* Greedy strategy, if last iteration didn't improve training, discard it */
 
 		Stopwatch trainingTimer = new Stopwatch();
 		trainingTimer.start();
@@ -123,13 +110,14 @@ public class NeuralNetwork {
 		System.out.println("Training Done in " + trainingTimer.toString());
 
 		/* Optional save */
-		if (NeuralNetwork.save == 1) {
+		if (save == 1) {
 			System.out.println("Neural Network saved as 'NeuralNetwork.nn");
 			Utilities.saveNeuralNetwork(network, "./NeuralNetwork.nn");
 		}
 
 		/* Stop Encog running */
 		Encog.getInstance().shutdown();
+		return network;
 	}
 
 	public static void main(String[] args) {
@@ -143,16 +131,14 @@ public class NeuralNetwork {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println(text);
 
-		Predict(new TestInputProcess(text, 2, 200).getVector);
+		Predict(new TestInputProcess(text, 2, 200).getVector, null);
 	}
 
-	public static void Predict(double[] input) {
+	public static void Predict(double[] input, BasicNetwork network) {
 		Language[] languages = Language.values();
 		BasicMLData data = new BasicMLData(input);
 		data.setData(input);
-		BasicNetwork network = Utilities.loadNeuralNetwork("./GoodNeuralNetwork.nn");
 		MLData output = network.compute(data);
 
 		double biggest = 0;
