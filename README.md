@@ -1,2 +1,9 @@
-# FourthYear_Artificial-Intelligence_Two
-A Language Detection Neural Network with Vector Hashing - Supplementary assignment in lieu of the written examination for this module.
+<p>
+  <h2 align="center">Language Detection Using Vector Hashing</h2>
+  <i><h4 align="center">Faris Nassif | G00347032@gmit.ie </h4></i>
+</p>
+
+## Contents
+* [Overview](#overview)
+
+### Overview
