@@ -1,7 +1,11 @@
 package ie.gmit.sw;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 
 import org.encog.Encog;
@@ -12,6 +16,7 @@ import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.buffer.MemoryDataLoader;
 import org.encog.ml.data.buffer.codec.CSVDataCODEC;
 import org.encog.ml.data.buffer.codec.DataSetCODEC;
@@ -31,6 +36,7 @@ import org.encog.util.csv.CSVFormat;
 import org.encog.util.simple.EncogUtility;
 
 import ie.gmit.sw.language.Language;
+import ie.gmit.sw.process.TestInputProcess;
 import ie.gmit.sw.util.Stopwatch;
 import ie.gmit.sw.util.Utilities;
 
@@ -87,7 +93,8 @@ public class NeuralNetwork {
 
 		/* Neural Network Training config, manhattan prop with learning rate of 0.021 */
 		ResilientPropagation train = new ResilientPropagation(network, folded);
-		// ManhattanPropagation manh = new ManhattanPropagation(network, folded, 0.00255);
+		// ManhattanPropagation manh = new ManhattanPropagation(network, folded,
+		// 0.00255);
 
 		/* (5)k-fold cross validation */
 		CrossValidationKFold kfold_train = new CrossValidationKFold(train, 5);
@@ -127,10 +134,41 @@ public class NeuralNetwork {
 
 	public static void main(String[] args) {
 		// new NeuralNetwork(1, 125);
-		BasicNetwork v = Utilities.loadNeuralNetwork("NeuralNetwork.nn");
-		TestNN(v);
+		// BasicNetwork v = Utilities.loadNeuralNetwork("./NeuralNetwork.nn");
+		/* Handle on the CSV file */
+
+		String text = "";
+		try {
+			text = new String(Files.readAllBytes(Paths.get("./predict.txt")), StandardCharsets.ISO_8859_1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println(text);
+
+		Predict(new TestInputProcess(text, 2, 200).getVector);
 	}
-	
+
+	public static void Predict(double[] input) {
+		Language[] languages = Language.values();
+		BasicMLData data = new BasicMLData(input);
+		data.setData(input);
+		BasicNetwork network = Utilities.loadNeuralNetwork("./GoodNeuralNetwork.nn");
+		MLData output = network.compute(data);
+
+		double biggest = 0;
+		int highest = 0;
+
+		for (int i = 0; i < output.size(); i++) {
+			if (output.getData(i) > biggest) {
+				biggest = output.getData(i);
+				System.out.println(languages[i].toString());
+				highest = i;
+			}
+		}
+
+		System.out.println("Predicted language: " + languages[highest].toString());
+	}
+
 	/* Test */
 	public void TestNN(MLDataPair mdlTrainingSet[]) {
 		int totalValues = 0;

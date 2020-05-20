@@ -3,13 +3,21 @@ package ie.gmit.sw.process;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
+
+import ie.gmit.sw.util.Utilities;
 
 /* Gets input, converts it to a vector and normalizes it for predictions */
 public class TestInputProcess {
 	/* Dirty static vars, will make everything nicer if theres time */
-	private static int kmers;
-	private static int vectorSize;
+	public static double[] getVector;
+	private static int kmers = 2;
+	private static int vectorSize = 200;
 	private static String text;
 	private static File inputFile;
 
@@ -19,10 +27,7 @@ public class TestInputProcess {
 		TestInputProcess.vectorSize = vectorSize;
 		TestInputProcess.text = text;
 
-		/* Delete file if exists */
-		testData.delete();
-
-		process();
+		process(TestInputProcess.text);
 	}
 
 	/* Input file constructor */
@@ -31,9 +36,6 @@ public class TestInputProcess {
 		TestInputProcess.vectorSize = vectorSize;
 		TestInputProcess.inputFile = inputFile;
 
-		/* Delete file if exists */
-		testData.delete();
-
 		try {
 			parse();
 		} catch (Throwable e) {
@@ -41,11 +43,13 @@ public class TestInputProcess {
 		}
 	}
 
-	private void parse() throws Throwable {
+	/* Parse file line by line */
+	private static void parse() throws Throwable {
 		BufferedReader bufferedReader = new BufferedReader(
 				new InputStreamReader(new FileInputStream(TestInputProcess.inputFile)));
 		String line = null;
 		while ((line = bufferedReader.readLine()) != null) {
+			System.out.println(line);
 			/* For each line of text in the document .. */
 			process(line);
 		}
@@ -53,7 +57,31 @@ public class TestInputProcess {
 		bufferedReader.close();
 	}
 
-	private void process() {
+	/* Process into a fixed size vector */
+	private static void process(String text) {
+		/* New vector each iteration */
+		double[] vector = new double[vectorSize];
 
+		/* Generate (n) kmers and loop (n) times */
+		for (String kmer : genKmers(text.toLowerCase(), TestInputProcess.kmers)) {
+			/* Increment the vector value at that index by 1 */
+			vector[kmer.hashCode() % vector.length]++;
+		}
+
+		/* Normalize it */
+		vector = Utilities.normalize(vector, 0, 1);
+
+		TestInputProcess.getVector = vector;
+	}
+
+	/* Standard, for each processed line, pass it in here and return kmers */
+	private static Set<String> genKmers(String text, int kmerSize) {
+		Set<String> kmers = new HashSet<String>();
+
+		for (int i = 0; i < text.length() - kmerSize; i++) {
+			kmers.add(text.substring(i, i + kmerSize));
+		}
+
+		return kmers;
 	}
 }

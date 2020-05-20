@@ -62,7 +62,6 @@ public class ConsoleMenu {
 		System.out.println("\n------ Neural Network Menu ------");
 		System.out.println("Press 1 : Create and Train a Neural Network on the fly (And optional save)");
 		System.out.println("Press 2 : Load a Previously Saved Neural Network");
-		System.out.println("Press 3 : Neural Network Option 3");
 		System.out.println("Press 9 : Go back to the Main Menu");
 		option = scanner.nextInt();
 
@@ -93,7 +92,6 @@ public class ConsoleMenu {
 				System.out.println("\n------ Neural Network Menu ------");
 				System.out.println("Press 1 : Create and Train a Neural Network on the fly (And optional save)");
 				System.out.println("Press 2 : Load a Previously Saved Neural Network");
-				System.out.println("Press 3 : Neural Network Option 3");
 				System.out.println("Press 9 : Go back to the Main Menu");
 				option = scanner.nextInt();
 			}
