@@ -32,11 +32,7 @@ public class VectorProcessor {
 		System.out.println("Checking to see if a csv file already exists .. ");
 
 		/* Delete file if exists */
-		if (data.delete()) {
-			System.out.println("Deleted the file: " + data.getName());
-		} else {
-			System.out.println("No file existed to delete");
-		}
+		data.delete();
 
 		System.out.println("Processing Vector[" + vectorSize + "] with k-mers of size " + kmers);
 		timer.start();
@@ -85,7 +81,6 @@ public class VectorProcessor {
 			/* Increment the vector value at that index by 1 */
 			vector[kmer.hashCode() % vector.length]++;
 		}
-
 		/* Normalize it */
 		vector = Utilities.normalize(vector, 0, 1);
 

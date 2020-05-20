@@ -43,10 +43,6 @@ public class NeuralNetwork {
 	public static int save;
 	DecimalFormat trainFormat = new DecimalFormat("#.######");
 
-	public static void main(String[] args) {
-		new NeuralNetwork(1, 285);
-	}
-
 	public NeuralNetwork(int save, int inputNodes) {
 		if (save != 1) {
 			save = 0;
@@ -76,7 +72,7 @@ public class NeuralNetwork {
 		network.getStructure().finalizeStructure();
 		network.reset();
 
-		System.out.println("Neural Network Generated, Reporting Topology ..");
+		System.out.println("Neural Network Generated, Reporting Topology ..\n");
 		System.out.println("[ReLU(" + inputNodes + ")]-->[BipolarSteepenedSigmoid(" + hiddenNodes
 				+ ")]-->[ActivationSoftMax(" + outputNodes + ")]\n");
 
@@ -91,8 +87,7 @@ public class NeuralNetwork {
 
 		/* Neural Network Training config, manhattan prop with learning rate of 0.021 */
 		ResilientPropagation train = new ResilientPropagation(network, folded);
-		// ManhattanPropagation train_manh = new ManhattanPropagation(network, folded,
-		// 0.021);
+		// ManhattanPropagation manh = new ManhattanPropagation(network, folded, 0.00255);
 
 		/* (5)k-fold cross validation */
 		CrossValidationKFold kfold_train = new CrossValidationKFold(train, 5);
@@ -102,18 +97,18 @@ public class NeuralNetwork {
 		Stopwatch trainingTimer = new Stopwatch();
 		trainingTimer.start();
 
-		System.out.println("Training will terminate at 600 seconds, X iterations or when no improvement is observed");
+		System.out.println("Training will terminate at 600 seconds");
 
 		/* Train */
 		int iteration = 1;
 		do {
 			kfold_train.iteration();
-			iteration++;
 			System.out.println(
 					"Iteration #" + iteration + " | Current Error: " + trainFormat.format(kfold_train.getError() * 100)
 							+ "% | Target Error: " + trainFormat.format(minError * 100) + "% | Time Elapsed "
 							+ trainingTimer.elapsedSeconds() + " seconds");
-		} while (iteration != 4);
+			iteration++;
+		} while (trainingTimer.elapsedSeconds() < 600);
 
 		/* Declare the end of training */
 		kfold_train.finishTraining();
@@ -130,8 +125,14 @@ public class NeuralNetwork {
 		Encog.getInstance().shutdown();
 	}
 
+	public static void main(String[] args) {
+		// new NeuralNetwork(1, 125);
+		BasicNetwork v = Utilities.loadNeuralNetwork("NeuralNetwork.nn");
+		TestNN(v);
+	}
+	
 	/* Test */
-	public void TestNN(MLDataPair mdlTrainingSet[], BasicNetwork network) {
+	public void TestNN(MLDataPair mdlTrainingSet[]) {
 		int totalValues = 0;
 		int correct = 0;
 		int i = 0;
