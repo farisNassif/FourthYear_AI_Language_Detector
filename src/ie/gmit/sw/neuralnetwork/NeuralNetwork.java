@@ -91,9 +91,9 @@ public class NeuralNetwork {
 		int iteration = 1;
 		do {
 			kfold_train.iteration();
-			/* Some information about individual epochs */
+			/* Some funky calculations to get accuracy as a % out of 100 */
 			System.out.println("Iteration #" + iteration + " | Current Training Accuracy : "
-					+ trainFormat.format(1 - ((kfold_train.getError() * 100))) + "% | Target: 98" + "% | Time Elapsed "
+					+ trainFormat.format(((1 - ((kfold_train.getError() * 100)))) *100) + "% | Target: 98" + "% | Time Elapsed "
 					+ trainingTimer.elapsedSeconds() + " seconds");
 			iteration++;
 		} while (trainingTimer.elapsedSeconds() < seconds);
@@ -140,10 +140,10 @@ public class NeuralNetwork {
 		System.out.println("Predicted language: " + languages[highest].toString());
 	}
 
-	public static void main(String[] args) {
-		new NeuralNetwork().TestNN(Utilities.loadNeuralNetwork("NeuralNetwork.nn"), 310);
-		// new NeuralNetwork().GenTrainNeuralNetwork(1, 310, 600);
-	}
+	//public static void main(String[] args) {
+		//new NeuralNetwork().TestNN(Utilities.loadNeuralNetwork("NeuralNetwork.nn"), 310);
+		//new NeuralNetwork().GenTrainNeuralNetwork(1, 310, 600);
+	//}
 
 	/* Test */
 	public void TestNN(BasicNetwork network, int hiddenLayers) {
