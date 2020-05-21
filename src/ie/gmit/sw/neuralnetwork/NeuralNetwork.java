@@ -142,7 +142,7 @@ public class NeuralNetwork {
 			/* If the i'th language looks better than any others seen before .. */
 			if (output.getData(i) > biggest) {
 				biggest = output.getData(i);
-				System.out.println(languages[i].toString());
+				System.out.println("New Best --> " + anguages[i].toString());
 				/* The i'th language gets saved as the highest */
 				highest = i;
 			}

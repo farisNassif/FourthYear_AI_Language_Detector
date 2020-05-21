@@ -16,7 +16,7 @@ import ie.gmit.sw.util.Utilities;
 
 /* Simple class that just handles the programs menus */
 public class ConsoleMenu {
-	Scanner scanner = new Scanner(System.in);
+	Scanner scanner = new Scanner(System.in, "ISO_8859_1");
 	BasicNetwork NN;
 	VectorProcessor vectorProcessor;
 
@@ -61,7 +61,6 @@ public class ConsoleMenu {
 				System.out.println("Press 9 : Quit");
 				option = scanner.nextInt();
 			}
-
 		}
 		scanner.close();
 	}
@@ -82,7 +81,7 @@ public class ConsoleMenu {
 
 		while (loop == true) {
 			switch (option) {
-			case 1:
+			case 1: // Neural Network Creation
 				System.out.println("How many input nodes should the NN have? (Should be equal to vector size)");
 				inputNodes = scanner.nextInt();
 				System.out.println("Save: Press 1 | Otherwise : Press 0");
@@ -108,7 +107,7 @@ public class ConsoleMenu {
 			if (option != 9) {
 				System.out.println("\n------ Neural Network Menu ------");
 				System.out.println("Press 1 : Create and Train a Neural Network on the fly (And optional save)");
-				System.out.println("Press 2 : Load a Previously Saved Neural Network");
+				System.out.println("Press 2 : Load a Previously Saved Neural Network to use for classification");
 				System.out.println("Press 9 : Go back to the Main Menu");
 				option = scanner.nextInt();
 			}
@@ -130,7 +129,7 @@ public class ConsoleMenu {
 
 		while (loop == true) {
 			switch (option) {
-			case 1:
+			case 1: // Vector Hashing
 				System.out.println("Specify Max Vector Size (Found best resutls with 200)");
 				vectorSize = scanner.nextInt();
 
@@ -173,7 +172,7 @@ public class ConsoleMenu {
 
 		while (loop == true) {
 			switch (option) {
-			case 1:
+			case 1: // Classification of a File
 				System.out.println("Enter the name of the File. Example -> ./filename.txt");
 				input = scanner.next();
 
@@ -187,16 +186,13 @@ public class ConsoleMenu {
 				new TestInputProcess(fileInput, vectorProcessor.getKmers(), vectorProcessor.getVectorSize());
 				NeuralNetwork.Predict(TestInputProcess.getVector, NN);
 				break;
-			case 2:
+			case 2: // Classification of a String
 				System.out.println("Enter a String of text to classify");
-				input = scanner.next();
-
+				input = scanner.nextLine();
+				input = scanner.nextLine(); // Needed a second read here because of a phantom read
+				
 				new TestInputProcess(input, vectorProcessor.getKmers(), vectorProcessor.getVectorSize());
 				NeuralNetwork.Predict(TestInputProcess.getVector, NN);
-
-				break;
-			case 3:
-				System.out.println("Vector / Ngram Option 3");
 				break;
 			case 9:
 				loop = false;
@@ -207,10 +203,9 @@ public class ConsoleMenu {
 			}
 
 			if (option != 9) {
-				System.out.println("\n----- Vector / Ngram Menu -----");
-				System.out.println("Press 1 : Create a new Vector & specify sizes");
-				System.out.println("Press 2 : Vector / Ngram Option 2");
-				System.out.println("Press 3 : Vector / Ngram Option 3");
+				System.out.println("\n----- Classificaition Menu -----");
+				System.out.println("Press 1 : Classify via a file");
+				System.out.println("Press 2 : Classify via an input string");
 				System.out.println("Press 9 : Go back to the Main Menu");
 				option = scanner.nextInt();
 			}
