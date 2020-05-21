@@ -1,15 +1,11 @@
 package ie.gmit.sw.neuralnetwork;
 
 import java.io.File;
-import java.io.IOException;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 
 import org.encog.Encog;
 import org.encog.engine.network.activation.ActivationBipolarSteepenedSigmoid;
+import org.encog.engine.network.activation.ActivationGaussian;
 import org.encog.engine.network.activation.ActivationReLU;
 import org.encog.engine.network.activation.ActivationSoftMax;
 import org.encog.engine.network.activation.ActivationTANH;
@@ -37,7 +33,6 @@ import org.encog.util.csv.CSVFormat;
 import org.encog.util.simple.EncogUtility;
 
 import ie.gmit.sw.language.Language;
-import ie.gmit.sw.process.TestInputProcess;
 import ie.gmit.sw.util.Stopwatch;
 import ie.gmit.sw.util.Utilities;
 
@@ -49,10 +44,9 @@ public class NeuralNetwork {
 	DecimalFormat trainFormat = new DecimalFormat("#.######");
 
 	/* Constructs, trains and returns a BasicNetwork */
-	public BasicNetwork GenTrainNeuralNetwork(int save, int inputNodes) {
+	public BasicNetwork GenTrainNeuralNetwork(int save, int inputNodes, int seconds) {
 		int outputNodes = 235;
 		int hiddenNodes = (int) Math.sqrt(inputNodes * outputNodes);
-		double minError = 0.002;
 
 		System.out.println("Generating Neural Network ..");
 
@@ -61,7 +55,7 @@ public class NeuralNetwork {
 		/* Input layer, amount of nodes are equal to vector size */
 		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputNodes));
 		/* Single hidden layer, nodes equal to sqrt of (input * output) nodes */
-		network.addLayer(new BasicLayer(new ActivationTANH(), true, hiddenNodes));
+		network.addLayer(new BasicLayer(new ActivationTANH(), true, hiddenNodes, 4135));
 		/* Output layer, size equal to amount of languages to be classified (235) */
 		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputNodes));
 		network.getStructure().finalizeStructure();
@@ -69,8 +63,8 @@ public class NeuralNetwork {
 
 		/* Some topology information .. */
 		System.out.println("Neural Network Generated, Reporting Topology ..\n");
-		System.out.println("[ReLU(" + inputNodes + ")]-->[BipolarSteepenedSigmoid(" + hiddenNodes
-				+ ")]-->[ActivationSoftMax(" + outputNodes + ")]\n");
+		System.out.println("[ReLU(" + inputNodes + ")]-->[HyperbolicTangent(" + hiddenNodes + ")]-->[ActivationSoftMax("
+				+ outputNodes + ")]\n");
 
 		/* Handle on the CSV file */
 		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, inputNodes,
@@ -82,7 +76,7 @@ public class NeuralNetwork {
 		FoldedDataSet folded = new FoldedDataSet(mdlTrainingSet);
 
 		/* Neural Network Training config, ResilPropagation */
-		ResilientPropagation train = new ResilientPropagation(network, folded, 0.01, 0.05);
+		ResilientPropagation train = new ResilientPropagation(network, folded, 0.02, 0.075);
 
 		/* (5)k-fold cross validation */
 		CrossValidationKFold kfold_train = new CrossValidationKFold(train, 5);
@@ -91,19 +85,18 @@ public class NeuralNetwork {
 		Stopwatch trainingTimer = new Stopwatch();
 		trainingTimer.start();
 
-		System.out.println("Training will terminate at 600 seconds");
+		System.out.println("Training will terminate at " + seconds + " seconds");
 
 		/* Train */
 		int iteration = 1;
 		do {
 			kfold_train.iteration();
 			/* Some information about individual epochs */
-			System.out.println(
-					"Iteration #" + iteration + " | Current Error: " + trainFormat.format(kfold_train.getError() * 100)
-							+ "% | Target Error: " + trainFormat.format(minError * 100) + "% | Time Elapsed "
-							+ trainingTimer.elapsedSeconds() + " seconds");
+			System.out.println("Iteration #" + iteration + " | Current Training Accuracy : "
+					+ trainFormat.format(1 - ((kfold_train.getError() * 100))) + "% | Target: 98" + "% | Time Elapsed "
+					+ trainingTimer.elapsedSeconds() + " seconds");
 			iteration++;
-		} while (trainingTimer.elapsedSeconds() < 600);
+		} while (trainingTimer.elapsedSeconds() < seconds);
 
 		/* Declare the end of training */
 		kfold_train.finishTraining();
@@ -148,18 +141,19 @@ public class NeuralNetwork {
 	}
 
 	public static void main(String[] args) {
-		/* Handle on the CSV file */
-		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, 325, 235, false);
-		MemoryDataLoader mdl = new MemoryDataLoader(dsc);
-		MLDataSet test = mdl.external2Memory();
-		BasicNetwork n = new Utilities().loadNeuralNetwork("./NeuralNetwork.nn");
-
-		new NeuralNetwork().TestNN(test, n);
+		new NeuralNetwork().TestNN(Utilities.loadNeuralNetwork("NeuralNetwork.nn"), 310);
+		// new NeuralNetwork().GenTrainNeuralNetwork(1, 310, 600);
 	}
 
 	/* Test */
-	/* 147 https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf */
-	public void TestNN(MLDataSet testdata, BasicNetwork network) {
+	public void TestNN(BasicNetwork network, int hiddenLayers) {
+		/* 147 https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf */
+		/* Handle on the CSV file and testing data */
+		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, hiddenLayers, 235,
+				false);
+		MemoryDataLoader mdl = new MemoryDataLoader(dsc);
+		MLDataSet testdata = mdl.external2Memory();
+
 		/* Timing testing */
 		Stopwatch timer = new Stopwatch();
 
@@ -168,6 +162,7 @@ public class NeuralNetwork {
 		int correct = 0;
 
 		timer.start();
+		System.out.println("Testing in progres ..");
 
 		for (MLDataPair pair : testdata) {
 			/* Keeps track of the best results from the prediction/actual set */
@@ -181,13 +176,9 @@ public class NeuralNetwork {
 
 			/* Loop 235 times over predicted data, for each language .. */
 			for (int i = 0; i < predictData.size(); i++) {
-				/* If the corresponding language value is positive .. */
-				if (predictData.getData(i) > 0) {
-					/* If a new best was found in the prediction data, mark it as best .. */
-					if ((predictData.getData(i) > predictData.getData(bestPredicted))) {
-						bestPredicted = i;
-					}
-
+				/* If a new best was found in the prediction data, mark it as best .. */
+				if ((predictData.getData(i) > predictData.getData(bestPredicted))) {
+					bestPredicted = i;
 				}
 			}
 
@@ -204,8 +195,6 @@ public class NeuralNetwork {
 			if (bestActual == bestPredicted) {
 				correct++;
 			}
-
-			// System.out.println(actual + " " + predict);
 			totalValues++;
 		}
 
@@ -214,6 +203,7 @@ public class NeuralNetwork {
 		/* Convert to double for display purposes */
 		double percent = (double) correct / (double) totalValues;
 
+		/* Some details about the testing */
 		System.out.println("\n*Testing Finished in " + timer.toString());
 		System.out.println("Total   - " + correct + "/" + totalValues);
 		System.out.println("Correct - " + String.format("%.2f", percent * 100) + "%");

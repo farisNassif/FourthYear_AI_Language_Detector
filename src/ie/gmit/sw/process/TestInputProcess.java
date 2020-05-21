@@ -1,60 +1,25 @@
 package ie.gmit.sw.process;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
 import ie.gmit.sw.util.Utilities;
 
-/* Gets input, converts it to a vector and normalizes it for predictions */
+/* Gets user input, converts it to a vector and normalizes it for predictions */
 public class TestInputProcess {
 	/* Dirty static vars, will make everything nicer if theres time */
 	public static double[] getVector;
 	private static int kmers = 2;
 	private static int vectorSize = 200;
 	private static String text;
-	private static File inputFile;
 
-	/* Input string constructor */
+	/* Input string constructor, changed to work for files now */
 	public TestInputProcess(String text, int kmers, int vectorSize) {
 		TestInputProcess.kmers = kmers;
 		TestInputProcess.vectorSize = vectorSize;
 		TestInputProcess.text = text;
 
 		process(TestInputProcess.text);
-	}
-
-	/* Input file constructor */
-	public TestInputProcess(File inputFile, int kmers, int vectorSize) {
-		TestInputProcess.kmers = kmers;
-		TestInputProcess.vectorSize = vectorSize;
-		TestInputProcess.inputFile = inputFile;
-
-		try {
-			parse();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-	}
-
-	/* Parse file line by line */
-	private static void parse() throws Throwable {
-		BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(TestInputProcess.inputFile)));
-		String line = null;
-		while ((line = bufferedReader.readLine()) != null) {
-			System.out.println(line);
-			/* For each line of text in the document .. */
-			process(line);
-		}
-		/* Processing is finished, close */
-		bufferedReader.close();
 	}
 
 	/* Process into a fixed size vector */
@@ -81,7 +46,6 @@ public class TestInputProcess {
 		for (int i = 0; i < text.length() - kmerSize; i++) {
 			kmers.add(text.substring(i, i + kmerSize));
 		}
-
 		return kmers;
 	}
 }

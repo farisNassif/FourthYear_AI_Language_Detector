@@ -70,30 +70,53 @@ public class ConsoleMenu {
 		/* Params for NN */
 		int inputNodes = 0;
 		int save = 0;
+		int seconds = 0;
 
 		int option;
 		boolean loop = true;
 		System.out.println("\n------ Neural Network Menu ------");
 		System.out.println("Press 1 : Create and Train a Neural Network on the fly (And optional save)");
 		System.out.println("Press 2 : Load a Previously Saved Neural Network to use for classification");
+		System.out.println("Press 3 : Test a Neural Network against the test dataset");
 		System.out.println("Press 9 : Go back to the Main Menu");
 		option = scanner.nextInt();
 
 		while (loop == true) {
 			switch (option) {
 			case 1: // Neural Network Creation
-				System.out.println("How many input nodes should the NN have? (Should be equal to vector size)");
-				inputNodes = scanner.nextInt();
-				System.out.println("Save: Press 1 | Otherwise : Press 0");
-				save = scanner.nextInt();
-				NN = new NeuralNetwork().GenTrainNeuralNetwork(save, inputNodes);
+				if (new File("./data.csv").exists()) {
+					System.out.println(
+							"How many input nodes should the NN have? (Should be equal to vector size, 310 advised)");
+					inputNodes = scanner.nextInt();
+					System.out.println("Save: Press 1 | Otherwise : Press 0");
+					save = scanner.nextInt();
+					System.out.println("How long should the NN train for (Seconds). An input of 600 --> 10 minutes");
+					seconds = scanner.nextInt();
+
+					NN = new NeuralNetwork().GenTrainNeuralNetwork(save, inputNodes, seconds);
+				} else {
+					System.out.println(
+							"Need to create the vector first to generate the csv file (No .csv file was found)");
+				}
+
 				break;
-			case 2:
+			case 2: // Load Neural Network
 				if (new File("./NeuralNetwork.nn").exists()) {
 					NN = Utilities.loadNeuralNetwork("./NeuralNetwork.nn");
 					System.out.println("Neural Network loaded!");
 				} else {
 					System.out.println("No Neural Network was found, create and save one first.");
+				}
+				break;
+			case 3: // Classify something
+				if (NN == null || vectorProcessor == null) {
+					System.out.println("Gotta have a Neural Network loaded/created + a vector created to test :(");
+				} else {
+					System.out.println(
+							"How big was the vector you created? (Should be same as hidden nodes in the NN you created, 310 advised)");
+					inputNodes = scanner.nextInt();
+
+					new NeuralNetwork().TestNN(NN, inputNodes);
 				}
 				break;
 			case 9:
@@ -108,6 +131,7 @@ public class ConsoleMenu {
 				System.out.println("\n------ Neural Network Menu ------");
 				System.out.println("Press 1 : Create and Train a Neural Network on the fly (And optional save)");
 				System.out.println("Press 2 : Load a Previously Saved Neural Network to use for classification");
+				System.out.println("Press 3 : Test a Neural Network against the test dataset");
 				System.out.println("Press 9 : Go back to the Main Menu");
 				option = scanner.nextInt();
 			}
@@ -130,7 +154,7 @@ public class ConsoleMenu {
 		while (loop == true) {
 			switch (option) {
 			case 1: // Vector Hashing
-				System.out.println("Specify Max Vector Size (Found best resutls with 325)");
+				System.out.println("Specify Max Vector Size (Found best resutls with 310)");
 				vectorSize = scanner.nextInt();
 
 				System.out.println("K-mer size (1 / 2 / 3 / 4, Anything else may crash everything! Also 2 is advised)");
@@ -176,7 +200,7 @@ public class ConsoleMenu {
 				System.out.println("Enter the name of the File. Example -> ./filename.txt");
 				input = scanner.next();
 
-				/* Gets the whole text as 'fileInput' */
+				/* Gets the whole text as a single string, makes it easier */
 				try {
 					fileInput = new String(Files.readAllBytes(Paths.get(input)), StandardCharsets.ISO_8859_1);
 				} catch (IOException e) {
@@ -189,8 +213,8 @@ public class ConsoleMenu {
 			case 2: // Classification of a String
 				System.out.println("Enter a String of text to classify");
 				input = scanner.nextLine();
-				input = scanner.nextLine(); // Needed a second read here because of a phantom read
-				
+				input = scanner.nextLine(); // Needed a second nextLine() here because of a phantom read, beware
+
 				new TestInputProcess(input, vectorProcessor.getKmers(), vectorProcessor.getVectorSize());
 				NeuralNetwork.Predict(TestInputProcess.getVector, NN);
 				break;
