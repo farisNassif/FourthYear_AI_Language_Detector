@@ -13,6 +13,7 @@ import org.encog.engine.network.activation.ActivationBipolarSteepenedSigmoid;
 import org.encog.engine.network.activation.ActivationReLU;
 import org.encog.engine.network.activation.ActivationSoftMax;
 import org.encog.engine.network.activation.ActivationTANH;
+import org.encog.mathutil.randomize.generate.GenerateRandom;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -42,7 +43,7 @@ import ie.gmit.sw.util.Utilities;
 
 /* 
  * Class that creates the NN topology, trains, tests and saves it.
- * Helped a lot - https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf 
+ * https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf 
  */
 public class NeuralNetwork {
 	DecimalFormat trainFormat = new DecimalFormat("#.######");
@@ -60,7 +61,7 @@ public class NeuralNetwork {
 		/* Input layer, amount of nodes are equal to vector size */
 		network.addLayer(new BasicLayer(new ActivationReLU(), true, inputNodes));
 		/* Single hidden layer, nodes equal to sqrt of (input * output) nodes */
-		network.addLayer(new BasicLayer(new ActivationTANH(), true, hiddenNodes, 125));
+		network.addLayer(new BasicLayer(new ActivationTANH(), true, hiddenNodes));
 		/* Output layer, size equal to amount of languages to be classified (235) */
 		network.addLayer(new BasicLayer(new ActivationSoftMax(), false, outputNodes));
 		network.getStructure().finalizeStructure();
@@ -81,7 +82,7 @@ public class NeuralNetwork {
 		FoldedDataSet folded = new FoldedDataSet(mdlTrainingSet);
 
 		/* Neural Network Training config, ResilPropagation */
-		ResilientPropagation train = new ResilientPropagation(network, folded);
+		ResilientPropagation train = new ResilientPropagation(network, folded, 0.01, 0.05);
 
 		/* (5)k-fold cross validation */
 		CrossValidationKFold kfold_train = new CrossValidationKFold(train, 5);
@@ -120,10 +121,6 @@ public class NeuralNetwork {
 		return network;
 	}
 
-	public static void main(String[] args) {
-
-	}
-
 	/* Post input processing, takes the vector and NN to generate a prediction */
 	public static void Predict(double[] input, BasicNetwork network) {
 		Language[] languages = Language.values();
@@ -142,7 +139,7 @@ public class NeuralNetwork {
 			/* If the i'th language looks better than any others seen before .. */
 			if (output.getData(i) > biggest) {
 				biggest = output.getData(i);
-				System.out.println("New Best --> " + anguages[i].toString());
+				System.out.println("New Best --> " + languages[i].toString());
 				/* The i'th language gets saved as the highest */
 				highest = i;
 			}
@@ -150,61 +147,75 @@ public class NeuralNetwork {
 		System.out.println("Predicted language: " + languages[highest].toString());
 	}
 
+	public static void main(String[] args) {
+		/* Handle on the CSV file */
+		DataSetCODEC dsc = new CSVDataCODEC(new File("./data.csv"), CSVFormat.DECIMAL_POINT, false, 325, 235, false);
+		MemoryDataLoader mdl = new MemoryDataLoader(dsc);
+		MLDataSet test = mdl.external2Memory();
+		BasicNetwork n = new Utilities().loadNeuralNetwork("./NeuralNetwork.nn");
+
+		new NeuralNetwork().TestNN(test, n);
+	}
+
 	/* Test */
-	public void TestNN(MLDataPair mdlTrainingSet[]) {
+	/* 147 https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf */
+	public void TestNN(MLDataSet testdata, BasicNetwork network) {
+		/* Timing testing */
+		Stopwatch timer = new Stopwatch();
+
+		/* Used to calculate % of correct predictions */
 		int totalValues = 0;
 		int correct = 0;
-		int i = 0;
-		int ideal = 0;
-		int res = 0;
 
-		/* Test the data */
-		for (MLDataPair data : mdlTrainingSet) {
-			/*
-			 * https://s3.amazonaws.com/heatonresearch-books/free/Encog3Java-User.pdf -
-			 * Page147
-			 */
-			MLData output = network.compute(data.getInput());
-			double[] preferred = data.getIdeal().getData(); //
+		timer.start();
 
-			for (i = 0; i < preferred.length; i++) {
-				if (preferred[i] == 1) {
-					ideal = i;
-				}
-			}
+		for (MLDataPair pair : testdata) {
+			/* Keeps track of the best results from the prediction/actual set */
+			int bestPredicted = 0;
+			int bestActual = 0;
 
-			for (i = 0; i < output.getData().length; i++) {
-				if (output.getData(i) == 1) {
-					res = i;
-					if (i == ideal) {
-						correct++;
+			/* Used to access prediction / actual data */
+			MLData input = pair.getInput();
+			MLData actualData = pair.getIdeal();
+			MLData predictData = network.compute(input);
+
+			/* Loop 235 times over predicted data, for each language .. */
+			for (int i = 0; i < predictData.size(); i++) {
+				/* If the corresponding language value is positive .. */
+				if (predictData.getData(i) > 0) {
+					/* If a new best was found in the prediction data, mark it as best .. */
+					if ((predictData.getData(i) > predictData.getData(bestPredicted))) {
+						bestPredicted = i;
 					}
-				}
 
+				}
 			}
+
+			/* Loop 235 times over actual data, for each language .. */
+			for (int j = 0; j < actualData.size(); j++) {
+				/* 1 will indicate the correct language for the set */
+				if (actualData.getData(j) == 1) {
+					/* Get the index of the '1' out of the 235 columns */
+					bestActual = j;
+				}
+			}
+
+			/* If the predicted best and actual best are the same index .. */
+			if (bestActual == bestPredicted) {
+				correct++;
+			}
+
+			// System.out.println(actual + " " + predict);
 			totalValues++;
 		}
 
-		DecimalFormat decimalFormat = new DecimalFormat("##.##");
-		decimalFormat.setRoundingMode(RoundingMode.CEILING);
+		timer.stop();
 
+		/* Convert to double for display purposes */
 		double percent = (double) correct / (double) totalValues;
 
-		System.out.println("\nINFO: Testing complete.");
-		System.out.println("Correct: " + correct + "/" + totalValues);
-		System.out.println("Accuracy: " + decimalFormat.format(percent * 100) + "%");
-
-		// System.out.println("\nINFO: Testing complete.");
-		// System.out.println("Correct: 8664" + "/" + totalValues);
-		// System.out.println("Accuracy: 73.8052645%"); // +
-		// decimalFormat.format(percent * 100) + "%");
-
-		double[] in = { 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0,
-				0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0.5,
-				0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.5, 0,
-				0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0.5 };
-
-		double[] out = new double[235];
+		System.out.println("\n*Testing Finished in " + timer.toString());
+		System.out.println("Total   - " + correct + "/" + totalValues);
+		System.out.println("Correct - " + String.format("%.2f", percent * 100) + "%");
 	}
-
 }

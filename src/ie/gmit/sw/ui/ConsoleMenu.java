@@ -89,8 +89,8 @@ public class ConsoleMenu {
 				NN = new NeuralNetwork().GenTrainNeuralNetwork(save, inputNodes);
 				break;
 			case 2:
-				if (new File("./GoodNeuralNetwork.nn").exists()) {
-					NN = Utilities.loadNeuralNetwork("./GoodNeuralNetwork.nn");
+				if (new File("./NeuralNetwork.nn").exists()) {
+					NN = Utilities.loadNeuralNetwork("./NeuralNetwork.nn");
 					System.out.println("Neural Network loaded!");
 				} else {
 					System.out.println("No Neural Network was found, create and save one first.");
@@ -130,7 +130,7 @@ public class ConsoleMenu {
 		while (loop == true) {
 			switch (option) {
 			case 1: // Vector Hashing
-				System.out.println("Specify Max Vector Size (Found best resutls with 200)");
+				System.out.println("Specify Max Vector Size (Found best resutls with 325)");
 				vectorSize = scanner.nextInt();
 
 				System.out.println("K-mer size (1 / 2 / 3 / 4, Anything else may crash everything! Also 2 is advised)");
