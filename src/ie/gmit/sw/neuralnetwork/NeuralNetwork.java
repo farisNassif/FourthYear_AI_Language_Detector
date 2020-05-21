@@ -80,14 +80,13 @@ public class NeuralNetwork {
 		/* "folds" the data into several equal (or nearly equal) datasets */
 		FoldedDataSet folded = new FoldedDataSet(mdlTrainingSet);
 
-		/* Neural Network Training config, manhattan prop with learning rate of 0.021 */
+		/* Neural Network Training config, ResilPropagation */
 		ResilientPropagation train = new ResilientPropagation(network, folded);
-		// ManhattanPropagation manh = new ManhattanPropagation(network, folded,
-		// 0.00255);
 
 		/* (5)k-fold cross validation */
 		CrossValidationKFold kfold_train = new CrossValidationKFold(train, 5);
 
+		/* To time training */
 		Stopwatch trainingTimer = new Stopwatch();
 		trainingTimer.start();
 
@@ -97,6 +96,7 @@ public class NeuralNetwork {
 		int iteration = 1;
 		do {
 			kfold_train.iteration();
+			/* Some information about individual epochs */
 			System.out.println(
 					"Iteration #" + iteration + " | Current Error: " + trainFormat.format(kfold_train.getError() * 100)
 							+ "% | Target Error: " + trainFormat.format(minError * 100) + "% | Time Elapsed "
@@ -121,37 +121,32 @@ public class NeuralNetwork {
 	}
 
 	public static void main(String[] args) {
-		// new NeuralNetwork(1, 125);
-		// BasicNetwork v = Utilities.loadNeuralNetwork("./NeuralNetwork.nn");
-		/* Handle on the CSV file */
 
-		String text = "";
-		try {
-			text = new String(Files.readAllBytes(Paths.get("./predict.txt")), StandardCharsets.ISO_8859_1);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		Predict(new TestInputProcess(text, 2, 200).getVector, null);
 	}
 
+	/* Post input processing, takes the vector and NN to generate a prediction */
 	public static void Predict(double[] input, BasicNetwork network) {
 		Language[] languages = Language.values();
 		BasicMLData data = new BasicMLData(input);
 		data.setData(input);
+
+		/* Generate a prediction based on input .. */
 		MLData output = network.compute(data);
 
+		/* Used to get current best result */
 		double biggest = 0;
 		int highest = 0;
 
+		/* Loop 235 times for each 'output' or language */
 		for (int i = 0; i < output.size(); i++) {
+			/* If the i'th language looks better than any others seen before .. */
 			if (output.getData(i) > biggest) {
 				biggest = output.getData(i);
 				System.out.println(languages[i].toString());
+				/* The i'th language gets saved as the highest */
 				highest = i;
 			}
 		}
-
 		System.out.println("Predicted language: " + languages[highest].toString());
 	}
 
