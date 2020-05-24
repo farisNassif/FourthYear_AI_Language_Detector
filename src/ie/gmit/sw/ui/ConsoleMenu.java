@@ -14,9 +14,10 @@ import ie.gmit.sw.process.TestInputProcess;
 import ie.gmit.sw.process.VectorProcessor;
 import ie.gmit.sw.util.Utilities;
 
-/* Simple class that just handles the programs menus */
+/* Simple keep-alive class that just handles the programs menus */
 public class ConsoleMenu {
 	Scanner scanner = new Scanner(System.in, "ISO_8859_1");
+	/* Once generated or loaded in this session, these are passed around */
 	BasicNetwork NN;
 	VectorProcessor vectorProcessor;
 
@@ -39,6 +40,7 @@ public class ConsoleMenu {
 				VectorMenu();
 				break;
 			case 3:
+				/* If theres not a NN and Vector in this session .. */
 				if (NN == null || vectorProcessor == null) {
 					System.out.println("Gotta have a Neural Network loaded/created + a vector created to classify :(");
 				} else {
@@ -190,7 +192,7 @@ public class ConsoleMenu {
 
 		System.out.println("\n----- Classificaition Menu -----");
 		System.out.println("Press 1 : Classify via a file");
-		System.out.println("Press 2 : Classify via an input string");
+		System.out.println("Press 2 : Classify via an input string (Beware, might phantom read)");
 		System.out.println("Press 9 : Go back to the Main Menu");
 		option = scanner.nextInt();
 
@@ -229,7 +231,7 @@ public class ConsoleMenu {
 			if (option != 9) {
 				System.out.println("\n----- Classificaition Menu -----");
 				System.out.println("Press 1 : Classify via a file");
-				System.out.println("Press 2 : Classify via an input string");
+				System.out.println("Press 2 : Classify via an input string (Beware, might phantom read)");
 				System.out.println("Press 9 : Go back to the Main Menu");
 				option = scanner.nextInt();
 			}

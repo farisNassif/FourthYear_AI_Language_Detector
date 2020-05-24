@@ -15,27 +15,11 @@ import ie.gmit.sw.language.Language;
 import ie.gmit.sw.util.Stopwatch;
 import ie.gmit.sw.util.Utilities;
 
+/* Processes a vector of N length, generates a csv data file */
 public class VectorProcessor {
 	private int kmers;
 	private int vectorSize;
 	private File data = new File("./data.csv");
-
-	public int getKmers() {
-		return kmers;
-	}
-
-	public void setKmers(int kmers) {
-		this.kmers = kmers;
-	}
-
-	public int getVectorSize() {
-		return vectorSize;
-	}
-
-	public void setVectorSize(int vectorSize) {
-		this.vectorSize = vectorSize;
-	}
-
 	private DecimalFormat df = new DecimalFormat("###.###");
 	Language[] langs = Language.values();
 
@@ -76,7 +60,7 @@ public class VectorProcessor {
 		bufferedReader.close();
 	}
 
-	/* Processes the language associated text */
+	/* Processes the language's associated text */
 	private void process(String line) throws Exception {
 		/* New vector each iteration */
 		double[] vector = new double[getVectorSize()];
@@ -139,7 +123,22 @@ public class VectorProcessor {
 		for (int i = 0; i < text.length() - kmerSize; i++) {
 			kmers.add(text.substring(i, i + kmerSize));
 		}
-
 		return kmers;
+	}
+
+	public int getKmers() {
+		return kmers;
+	}
+
+	public void setKmers(int kmers) {
+		this.kmers = kmers;
+	}
+
+	public int getVectorSize() {
+		return vectorSize;
+	}
+
+	public void setVectorSize(int vectorSize) {
+		this.vectorSize = vectorSize;
 	}
 }
