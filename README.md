@@ -24,4 +24,4 @@ Run the following in your CLI (<i>Assuming you have Git!</i>)
 
 1. ```git clone https://github.com/farisNassif/FourthYear_Artificial-Intelligence_Supplementary```
 2. CD into the project directory
-3. ```java -cp .\executables\language-nn.jar;lib\* ie.gmit.sw.Runner```
+3. ```java -cp executables\language-nn.jar;lib\* ie.gmit.sw.Runner```
